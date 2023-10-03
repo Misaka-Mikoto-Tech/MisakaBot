@@ -1,0 +1,10 @@
+.text {
+    margin-top: 5px;
+    word-break: break-all;
+    white-space: pre-wrap;
+    font-family: HarmonyOS Sans SC, HarmonyOS_Regular, Dosis,Open Sans,pingfang SC,helvetica neue,arial,hiragino sans gb,Microsoft YaHei UI,Microsoft YaHei,simsun,sans-serif,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji;
+}
+
+.main-box {
+    padding: 5px;
+}

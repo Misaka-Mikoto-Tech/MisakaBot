@@ -1,0 +1,11 @@
+pip show nonebot2
+Name: nonebot2
+Version: 2.0.0rc4
+Summary: An asynchronous python bot framework.
+Home-page: https://v2.nonebot.dev/
+Author: yanyongyu
+Author-email: yyy@nonebot.dev
+License: MIT
+Location: /usr/local/lib/python3.8/dist-packages
+Requires: loguru, pydantic, pygtrie, tomli, typing-extensions, yarl
+Required-by: haruka-bot, nonebot-adapter-mirai2, nonebot-adapter-onebot, nonebot-adapter-qqguild, nonebot-adapter-spigot, nonebot-plugin-apscheduler, nonebot-plugin-guild-patch, nonebot-plugin-htmlrender, nonebot-plugin-localstore, nonebot-plugin-naturel-gpt, nonebot-plugin-novelai, nonebot-plugin-picstatus, nonebot-plugin-sentry
