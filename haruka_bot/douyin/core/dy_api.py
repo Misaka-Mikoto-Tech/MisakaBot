@@ -91,14 +91,14 @@ async def get_danmu_ws_url(room_id, live_room_real_id, retry=0):
 async def get_web_rid_from_short_url(url: str):
     async with AsyncClient() as client:
         resp = await client.head(
-            url, headers=get_request_headers(), proxies=get_proxies(),
+            url, headers=get_request_headers()
         )
     full_uri = resp.headers.get('location')
     room_id = full_uri[full_uri.index('reflow/') + 7:full_uri.index('?')]
     api = f'https://webcast.amemv.com/webcast/room/reflow/info/?type_id=0&live_id=1&room_id={room_id}&app_id=1128'
     async with AsyncClient() as client:
         resp = await client.get(
-            api, headers=get_request_headers(), proxies=get_proxies(),
+            api, headers=get_request_headers()
         )
     json_root = json.loads(resp.text)
     return json_root['data']['room']['owner']['web_rid']

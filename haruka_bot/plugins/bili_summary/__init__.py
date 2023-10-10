@@ -19,8 +19,8 @@ async def bili_summary_check_is_enable(event: MessageEvent, bot:Bot) -> bool:
     else:
         return False
     
-try:
-    import nonebot_plugin_bilichat
-    nonebot_plugin_bilichat.check_is_enabled = bili_summary_check_is_enable
-except Exception as ex:
-    logger.error(f'haruka_bot.plugins.bili_summary: set [nonebot_plugin_bilichat.check_is_enabled fail]:{ex}')
+# try:
+#     import nonebot_plugin_bilichat
+#     nonebot_plugin_bilichat.check_is_enabled = bili_summary_check_is_enable
+# except Exception as ex:
+#     logger.error(f'haruka_bot.plugins.bili_summary: set [nonebot_plugin_bilichat.check_is_enabled fail]:{ex}')

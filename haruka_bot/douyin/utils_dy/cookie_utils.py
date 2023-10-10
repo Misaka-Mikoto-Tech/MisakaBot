@@ -67,7 +67,7 @@ async def get_cookie_cache() -> Optional[str]:
 
 async def auto_get_cookie():
     global cookie_cache, cookie_failed
-    logger.info(f'获取cookie中...')
+    logger.info(f'[抖音] 获取cookie中...')
 
     # browser = Browser()
     # browser.open('https://www.douyin.com')
@@ -97,9 +97,9 @@ async def auto_get_cookie():
     if ttwid is not None:
         cookie += '; ttwid=' + ttwid
         cookie_cache = cookie
-        logger.info(f'cookie获取完成')
+        logger.info(f'[抖音] cookie获取完成')
     else:
-        logger.error(f'cookie获取失败')
+        logger.error(f'[抖音] cookie获取失败')
 
     cookie_failed = 0
 

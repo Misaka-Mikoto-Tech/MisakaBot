@@ -9,15 +9,16 @@ import urllib.parse
 import execjs
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Any, Union, Optional
+from typing import Dict, List, Any, Tuple, Union, Optional
 from httpx import AsyncClient
 from nonebot import logger
 from nonebot.adapters.onebot.v11 import Bot, MessageSegment, Message
 
 from ...database.models import User_dy
 from .cookie_utils import auto_get_cookie
-from ..core.dy_api import get_random_ua
+from ..core.dy_api import get_random_ua, get_request_headers
 from ..core.room_info import RoomInfo
+from ..utils_dy.web_rid import get_sec_user_id_from_live_url, get_live_room_id
 
 REQ_SUFFIX = "&pc_client_type=1&version_code=170400&version_name=17.4.0&cookie_enabled=true&screen_width=1920&screen_height=1080&browser_language=zh-CN&browser_platform=Win32&browser_name=Chrome&browser_version=102.0.0.0&browser_online=true&engine_name=Blink&engine_version=102.0.0.0&os_name=Windows&os_version=10&cpu_core_num=12&device_memory=8&platform=PC&downlink=10&effective_type=4g&round_trip_time=50"
 USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36'
@@ -192,32 +193,32 @@ async def create_aweme_msg(dyn:Any) -> Message:
         video_url = f"https://www.douyin.com/video/{aweme_id}"
         return msg + video_url
     
-async def get_live_short_url(room_id, id_str) -> Optional[str]:
-    """获取直播间短链"""
-    url = (f"https://www.douyin.com/aweme/v1/web/web_shorten/?target=https://live.douyin.com/{room_id}?room_id={id_str}"
-            + "&enter_from_merge=web_share_link&enter_method=web_share_link&previous_page=app_code_link")
-    url = add_xbogus(url)
+# async def get_live_short_url(room_id, id_str) -> Optional[str]:
+#     """获取直播间短链"""
+#     url = (f"https://www.douyin.com/aweme/v1/web/web_shorten/?target=https://live.douyin.com/{room_id}?room_id={id_str}"
+#             + "&enter_from_merge=web_share_link&enter_method=web_share_link&previous_page=app_code_link")
+#     url = add_xbogus(url)
 
-    headers = {
-        'referer': f"https://live.douyin.com/{room_id}",
-        'User-Agent': USER_AGENT
-    }
+#     headers = {
+#         'referer': f"https://live.douyin.com/{room_id}",
+#         'User-Agent': USER_AGENT
+#     }
 
-    try:
-        async with AsyncClient() as client:
-            resp = await client.get(
-                url, headers=headers,
-            )
-        resp.encoding = "utf-8"
-        resp_json = json.loads(resp.text)
-        if 'data' not in resp_json or resp_json.get('message', '') == 'error':
-            logger.error(f"获取直播间短链失败，: {resp_json['reason']}")
-            return None
-        else:
-            return resp_json['data']
-    except Exception as e:
-        logger.error(f'获取直播间短链失败，可能是 X-Bogus 算法已过时: {e}')
-        return None
+#     try:
+#         async with AsyncClient() as client:
+#             resp = await client.get(
+#                 url, headers=headers,
+#             )
+#         resp.encoding = "utf-8"
+#         resp_json = json.loads(resp.text)
+#         if 'data' not in resp_json or resp_json.get('message', '') == 'error':
+#             logger.error(f"获取直播间短链失败，: {resp_json['reason']}")
+#             return None
+#         else:
+#             return resp_json['data']
+#     except Exception as e:
+#         logger.error(f'获取直播间短链失败，可能是 X-Bogus 算法已过时: {e}')
+#         return None
 
 
 async def create_live_msg(user: User_dy, room_info: RoomInfo) -> Message:
@@ -227,10 +228,19 @@ async def create_live_msg(user: User_dy, room_info: RoomInfo) -> Message:
 
     title = room_info.get_title()
     cover = room_info.get_cover_url()
-    url = f"https://live.douyin.com/{user.room_id}"
-    short_url = await get_live_short_url(user.room_id, room_info.get_real_room_id())
-    share_msg = url # f"\n{random.randint(1, 9)}- #在抖音，记录美好生活#【{user.name}】正在直播，来和我一起支持Ta吧。复制下方链接，打开【抖音】，直接观看直播！ {short_url}" if short_url else url
+
+    if user.live_url:
+        share_msg = (f"\n{random.randint(1, 9)}- #在抖音，记录美好生活#【{user.name}】正在直播，来和我一起支持Ta吧。复制下方链接，打开【抖音】，直接观看直播！ {user.live_url}")
+    else:
+        share_msg = f"https://live.douyin.com/{user.room_id}"
+
     live_msg = (
         f"{user.name} 正在直播\n--------------------\n标题：{title}\n" + MessageSegment.image(cover) + f"\n{share_msg}"
     )
     return live_msg
+
+async def get_room_id_and_sec_uid_from_live_url(live_url: str) -> Tuple[int, str]:
+    """通过直播间短链获取直播间号和 sec_uid"""
+    room_id,sec_user_id = await get_sec_user_id_from_live_url(live_url)
+    web_rid = await get_live_room_id(room_id,sec_user_id)
+    return (web_rid, sec_user_id)

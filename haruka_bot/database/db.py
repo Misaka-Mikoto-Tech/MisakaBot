@@ -355,7 +355,7 @@ class DB:
         q = {"group_id":kwargs["group_id"], "bot_id":kwargs["bot_id"], "sec_uid":kwargs["sec_uid"]}
         if not await Sub_dy.add(q, **kwargs):
             return False
-        await cls.add_user_dy(sec_uid=kwargs["sec_uid"], name=name, room_id=kwargs["room_id"])
+        await cls.add_user_dy(sec_uid=kwargs["sec_uid"], name=name, room_id=kwargs["room_id"], live_url=kwargs["live_url"])
         await cls.update_uid_list_dy()
         return True
     
@@ -367,7 +367,7 @@ class DB:
         await Sub_dy.update(q, **q, name = name)
 
         q = {"sec_uid":kwargs["sec_uid"]}
-        await User_dy.update(q, name=name,room_id=kwargs["room_id"])
+        await User_dy.update(q, name=name, room_id=kwargs["room_id"], live_url=kwargs["live_url"])
         await cls.update_uid_list_dy()
 
     @classmethod

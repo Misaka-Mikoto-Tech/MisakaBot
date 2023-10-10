@@ -38,12 +38,12 @@ async def _(
 
     name = vive_texts[0]
     if not (uid := await uid_extract(name)):
-        return await vive.send(MessageSegment.at(event.user_id) + "未找到该 UP，请输入正确的UP 名、UP UID或 UP 首页链接")
+        return await vive.send(MessageSegment.at(event.user_id) + " 未找到该 UP，请输入正确的UP 名、UP UID或 UP 首页链接")
 
     if isinstance(uid, list):
-        return await vive.send(MessageSegment.at(event.user_id) + f"未找到{name}, 你是否想要找:\n" + '\n'.join([item['uname'] for item in uid[:10] ]))
+        return await vive.send(MessageSegment.at(event.user_id) + f" 未找到{name}, 你是否想要找:\n" + '\n'.join([item['uname'] for item in uid[:10] ]))
     elif int(uid) == 0:
-        return await vive.send(MessageSegment.at(event.user_id) + "UP 主不存在")
+        return await vive.send(MessageSegment.at(event.user_id) + " UP 主不存在")
 
     user_agent: str = config.haruka_browser_ua or (
             "Mozilla/5.0 (Linux; Android 11; RMX3161 Build/RKQ1.201217.003; wv) AppleWebKit/537.36 "
@@ -61,7 +61,7 @@ async def _(
             )
             )["items"]
     except Exception as e:
-        return await vive.send(MessageSegment.at(event.user_id) + f"获取动态失败：{e}")
+        return await vive.send(MessageSegment.at(event.user_id) + f" 获取动态失败：{e}")
 
     offset_num = int(vive_texts[1]) if len(vive_texts) > 1 else 0
 
@@ -71,11 +71,11 @@ async def _(
         try:
             dyn = dynamics[offset_num]
         except IndexError:
-            return await vive.send(MessageSegment.at(event.user_id) + "你输入的数字过大，该 UP 的最后一页动态没有这么多条")
+            return await vive.send(MessageSegment.at(event.user_id) + " 你输入的数字过大，该 UP 的最后一页动态没有这么多条")
         dynamic_id = int(dyn["id_str"])
         shot_image = await get_dynamic_screenshot(dynamic_id)
         if shot_image is None:
-            return await vive.send(MessageSegment.at(event.user_id) + f"获取{name}动态失败")
+            return await vive.send(MessageSegment.at(event.user_id) + f" 获取{name}动态失败")
         type_msg = {
                 0: "发布了新动态",
                 "DYNAMIC_TYPE_FORWARD": "转发了一条动态",

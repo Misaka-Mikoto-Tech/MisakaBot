@@ -5,7 +5,7 @@ from ...database import DB as db
 from ...utils import get_type_id, on_command, permission_check, to_me
 from ... import config
 
-sub_list_dy = on_command("抖音关注列表", aliases={"抖音列表"}, rule=to_me(), priority=5, block=True)
+sub_list_dy = on_command("抖音关注列表", aliases={"抖音列表", "抖音订阅列表"}, rule=to_me(), priority=5, block=True)
 print(sub_list_dy)
 sub_list_dy.__doc__ = """抖音关注列表"""
 

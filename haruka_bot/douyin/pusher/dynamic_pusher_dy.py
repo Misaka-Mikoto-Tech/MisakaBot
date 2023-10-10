@@ -28,7 +28,6 @@ async def dy_sched():
     """抖音动态推送"""
 
     global offset_dy
-    await asyncio.sleep(random.uniform(5, 10)) # 随机等待几秒钟，防止被风控
 
     sec_uid: str = str(await db.next_uid_dy("dynamic"))
     if not sec_uid or (sec_uid not in offset_dy): # 未找到或已删除

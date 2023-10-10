@@ -71,6 +71,7 @@ class User_dy(BaseModel):
     sec_uid = CharField(max_length=100)
     name = CharField(max_length=100)
     room_id = IntField(default=0)
+    live_url = CharField(max_length=100)
 
 class Group(BaseModel):
     # tortoise 不支持复合主键，因此只能代码里不设置主键(tortoise会自动创建一个名为id的自增列作为主键)
