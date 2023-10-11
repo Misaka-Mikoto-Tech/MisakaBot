@@ -230,7 +230,8 @@ async def create_live_msg(user: User_dy, room_info: RoomInfo) -> Message:
     cover = room_info.get_cover_url()
 
     if user.live_url:
-        share_msg = (f"\n{random.randint(1, 9)}- #在抖音，记录美好生活#【{user.name}】正在直播，来和我一起支持Ta吧。复制下方链接，打开【抖音】，直接观看直播！ {user.live_url}")
+        share_msg = (f"\n{random.randint(1, 9)}- #在抖音，记录美好生活#【{user.name}】正在直播，来和我一起支持Ta吧。复制下方链接，打开【抖音】，直接观看直播！ {user.live_url}"
+                     f" {random.randint(1, 9)}@{random.randint(1, 9)}.com {random.randint(1, 11):02}/{random.randint(1, 11):02}")
     else:
         share_msg = f"https://live.douyin.com/{user.room_id}"
 
