@@ -30,12 +30,14 @@ async def _(
 ):
     vive_texts = arg.strip().split(' ')
 
-    user_name = vive_texts[0]
-    if not (sec_uid := await get_sec_user_id(user_name)):
-        return await delete_sub_dy.send(MessageSegment.at(event.user_id) + "未找到该 UP，请输入正确的UP 名、UP UID或 UP 首页链接")
-
-    if isinstance(sec_uid, list):
-        return await delete_sub_dy.send(MessageSegment.at(event.user_id) + f"未找到{user_name}, 你是否想要找:\n" + '\n'.join([item['user_info']['nickname'] for item in sec_uid[:10] ]))
+    user_name = vive_texts[0].strip()
+    if user_name.startswith('MS4wLj') and len(user_name) > 50: # 用户输入了一个 sec_uid
+        sec_uid = user_name
+    else:
+        user = await db.get_user_dy(user_name=user_name) # 从数据库中查找用户名，因为用户可以改名，可能目前已经不是这个名字了
+        if not user:
+            return await delete_sub_dy.send(MessageSegment.at(event.user_id) + " 未找到该 UP，请输入正确的UP 名、sec_uid")
+        sec_uid = user.sec_uid
     
     result = await db.delete_sub_dy(
         sec_uid=sec_uid,

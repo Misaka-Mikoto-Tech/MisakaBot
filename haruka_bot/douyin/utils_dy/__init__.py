@@ -224,7 +224,7 @@ async def create_aweme_msg(dyn:Any) -> Message:
 async def create_live_msg(user: User_dy, room_info: RoomInfo) -> Message:
     """生成直播分享x信息"""
     # https://live.douyin.com/824433208053?room_id=7282413254901533479&enter_from_merge=web_share_link&enter_method=web_share_link&previous_page=app_code_link
-    # 1- #在抖音，记录美好生活#【一吱大仙】正在直播，来和我一起支持Ta吧。复制下方链接，打开【抖音】，直接观看直播！ https://v.douyin.com/ieGsnGsm/
+    # 1- #在抖音，记录美好生活#【一吱大仙】正在直播，来和我一起支持Ta吧。复制下方链接，打开【抖音】，直接观看直播！ https://v.douyin.com/ieGsnGsm/ 8@5.com 02/11
 
     title = room_info.get_title()
     cover = room_info.get_cover_url()
