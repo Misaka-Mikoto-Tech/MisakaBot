@@ -99,7 +99,7 @@ async def _(
         BV: str = ''
         if dyn['type'] == 'DYNAMIC_TYPE_AV': # 视频动态的话附上BV号，app端可以直接打开视频
             jump_url: str = dyn['modules']['module_dynamic']['major']['archive']['jump_url']
-            BV = jump_url[len('//www.bilibili.com/video/'):-2]
+            BV = jump_url[len('//www.bilibili.com/video/'):-1]
             message += f'\n复制下方BV号，打开【B站APP】，直接观看视频！'
 
         await vive.send(message)

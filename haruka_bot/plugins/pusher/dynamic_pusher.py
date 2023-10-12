@@ -135,7 +135,7 @@ async def dy_sched():
             BV: str = ''
             if dynamic['type'] == 'DYNAMIC_TYPE_AV': # 视频动态的话附上BV号，app端可以直接打开视频
                 jump_url: str = dynamic['modules']['module_dynamic']['major']['archive']['jump_url']
-                BV = jump_url[len('//www.bilibili.com/video/'):-2]
+                BV = jump_url[len('//www.bilibili.com/video/'):-1]
                 message += f'\n复制下方BV号，打开【B站APP】，直接观看视频！'
 
             push_list = await db.get_push_list(uid, "dynamic")
