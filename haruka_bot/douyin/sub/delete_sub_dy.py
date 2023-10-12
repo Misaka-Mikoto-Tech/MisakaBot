@@ -34,7 +34,7 @@ async def _(
     if user_name.startswith('MS4wLj') and len(user_name) > 50: # 用户输入了一个 sec_uid
         sec_uid = user_name
     else:
-        user = await db.get_user_dy(user_name=user_name) # 从数据库中查找用户名，因为用户可以改名，可能目前已经不是这个名字了
+        user = await db.get_user_dy(name=user_name) # 从数据库中查找用户名，因为用户可以改名，可能目前已经不是这个名字了
         if not user:
             return await delete_sub_dy.send(MessageSegment.at(event.user_id) + " 未找到该 UP，请输入正确的UP 名、sec_uid")
         sec_uid = user.sec_uid
