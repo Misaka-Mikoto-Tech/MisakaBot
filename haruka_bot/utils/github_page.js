@@ -28,4 +28,7 @@ function removeExtraDoms() {
         eleBottom.style.marginBottom = '30px';
         document.body.append(eleBottom);
     }
+
+    // pull/01/files#diff-... 页面会被滚动到选中行，需要给它复位
+    document.documentElement.scrollTop = 0;
 }
