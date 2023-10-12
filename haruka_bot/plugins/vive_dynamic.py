@@ -1,4 +1,7 @@
 
+import json
+import asyncio
+from pathlib import Path
 from typing import List
 from loguru import logger
 from nonebot.matcher import matchers
@@ -67,6 +70,7 @@ async def _(
 
     if dynamics:
         dynamics = sorted(dynamics, key=lambda x: int(x["id_str"]), reverse=True)
+        # Path('./bili_dynamics.json').write_text(json.dumps(dynamics, indent=2,ensure_ascii=False))
         # logger.info(f"动态列表:{dynamics}, offset_num:{offset_num}")
         try:
             dyn = dynamics[offset_num]
@@ -92,6 +96,16 @@ async def _(
             + f"\n"
             + await get_b23_url(f"https://t.bilibili.com/{dynamic_id}")
         )
-        return await vive.send(message)
+        BV: str = ''
+        if dyn['type'] == 'DYNAMIC_TYPE_AV': # 视频动态的话附上BV号，app端可以直接打开视频
+            jump_url: str = dyn['modules']['module_dynamic']['major']['archive']['jump_url']
+            BV = jump_url[len('//www.bilibili.com/video/'):-2]
+            message += f'\n复制下方BV号，打开【B站APP】，直接观看视频！'
+
+        await vive.send(message)
+        if BV:
+            await asyncio.sleep(0.5)
+            await vive.send(BV)
+        return
         
     return await vive.send("该 UP 未发布任何动态")
