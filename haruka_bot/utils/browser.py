@@ -25,6 +25,7 @@ from .fonts_provider import fill_font
 
 _browser: Optional[Browser] = None
 mobile_js = Path(__file__).parent.joinpath("mobile.js")
+github_js = Path(__file__).parent.joinpath("github_page.js")
 
 
 async def init_browser(**kwargs) -> Browser:
@@ -258,6 +259,7 @@ async def get_github_screenshot(url: str):
 
     browser:Browser = await get_browser()
     context = await browser.new_context(
+        bypass_csp=True,
         proxy={"server": config.overseas_proxy} if config.overseas_proxy else None,
         device_scale_factor=2,
         user_agent=user_agent,
@@ -266,43 +268,23 @@ async def get_github_screenshot(url: str):
     page = await context.new_page()
 
     try:
-        dt1 = time.time()
         await page.goto(
                 url,
                 wait_until="networkidle",
                 timeout=config.haruka_dynamic_timeout * 1000,
             )
+        await page.add_script_tag(path= github_js)
+        await page.evaluate('removeExtraDoms()')
+
         await page.wait_for_load_state("networkidle")
         await page.wait_for_load_state("domcontentloaded")
 
-        dt2 = time.time()
-        # print(f"visit github: {dt2 - dt1}")
-
-        show_issue = await page.query_selector("#show_issue") or await page.query_selector(".js-issues-results") # 总框
-        layout_main = await page.query_selector(".Layout-main") # 提取宽度
-        discussion_timeline_actions = await page.query_selector(".discussion-timeline-actions") # 底部评论区
-        pull_discussion_timeline = await page.query_selector(".pull-discussion-timeline") # 包含pull内容和评论区的block
-
-        clip_show_issue = await show_issue.bounding_box() if show_issue else None
-        clip_layout_main = await layout_main.bounding_box() if layout_main else None
-        clip_discussion_timeline_actions = await discussion_timeline_actions.bounding_box() if discussion_timeline_actions else None
-        clip_pull_discussion_timeline = await pull_discussion_timeline.bounding_box() if pull_discussion_timeline else None
-
-        assert(clip_show_issue)
-        assert(clip_layout_main)
-        assert(clip_discussion_timeline_actions)
-        margin = 17
-        spacing_bottom = clip_layout_main['height'] - clip_pull_discussion_timeline["height"] if clip_pull_discussion_timeline else 0
-        clip = FloatRect(
-                x=clip_show_issue['x'] - margin,
-                y= clip_show_issue['y'] - margin,
-                width= clip_layout_main['width'] + margin * 2 - 1,
-                height= clip_show_issue['height'] - clip_discussion_timeline_actions['height'] - spacing_bottom + margin * 2
-        )
-
-        screenshot = await page.screenshot(clip=clip, full_page=True)
-        dt3 = time.time()
-        # print(f"screenshot:{dt3 - dt2}")
+        body = await page.query_selector('body')
+        body_clip = await body.bounding_box() if body else None
+        if body_clip:
+            body_clip['x'] = 0.0
+            body_clip['y'] = 0.0
+        screenshot = await page.screenshot(clip=body_clip, full_page=True)
         return screenshot
 
     except Exception as e:
