@@ -263,7 +263,7 @@ async def get_github_screenshot(url: str):
         proxy={"server": config.overseas_proxy} if config.overseas_proxy else None,
         device_scale_factor=2,
         user_agent=user_agent,
-        viewport={"width": 980, "height": 780},
+        viewport={"width": 800, "height": 600},
         )
     page = await context.new_page()
 
