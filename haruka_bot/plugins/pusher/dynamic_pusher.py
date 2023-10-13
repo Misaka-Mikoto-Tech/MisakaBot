@@ -126,17 +126,19 @@ async def dy_sched():
                 "DYNAMIC_TYPE_ARTICLE": "发布了新专栏",
                 "DYNAMIC_TYPE_MUSIC": "发布了新音频",
             }
-            url = await bilibili_request.get_b23_url(url)
+
+            if dynamic['type'] == 'DYNAMIC_TYPE_AV':  # 视频动态直接放视频链接，动态里的视频框在App上视频点不动（可能是B站bug）
+                jump_url: str = dynamic['modules']['module_dynamic']['major']['archive']['jump_url']
+                BV = jump_url[len('//www.bilibili.com/video/'):-1]
+                jump_url = f'https://b23.tv/{BV}'
+            else:
+                jump_url = await bilibili_request.get_b23_url(f"https://t.bilibili.com/{dynamic_id}")
+                
             message = (
                 f"{name} {type_msg.get(dynamic['type'], type_msg[0])}：\n"
                 + MessageSegment.image(image)
-                + f"\n{url}"
+                + f"\n{jump_url}"
             )
-            BV: str = ''
-            if dynamic['type'] == 'DYNAMIC_TYPE_AV': # 视频动态的话附上BV号，app端可以直接打开视频
-                jump_url: str = dynamic['modules']['module_dynamic']['major']['archive']['jump_url']
-                BV = jump_url[len('//www.bilibili.com/video/'):-1]
-                message += f'\n复制下方BV号，打开【B站APP】，直接观看视频！'
 
             push_list = await db.get_push_list(uid, "dynamic")
             for sets in push_list:
@@ -147,16 +149,6 @@ async def dy_sched():
                     message=message,
                     at=bool(sets.at) and config.haruka_dynamic_at,
                 )
-            if BV:
-                await asyncio.sleep(0.5)
-                for sets in push_list:
-                    await safe_send(
-                        bot_id=sets.bot_id,
-                        send_type=sets.type,
-                        type_id=sets.type_id,
-                        message=BV,
-                        at=False,
-                    )
 
             offset[uid] = dynamic_id
 

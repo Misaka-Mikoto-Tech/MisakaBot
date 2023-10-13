@@ -89,23 +89,22 @@ async def _(
                 "DYNAMIC_TYPE_ARTICLE": "发布了新专栏",
                 "DYNAMIC_TYPE_MUSIC": "发布了新音频",
             }
+        
+        if dyn['type'] == 'DYNAMIC_TYPE_AV':  # 视频动态直接放视频链接，动态里的视频框在App上视频点不动（可能是B站bug）
+            jump_url: str = dyn['modules']['module_dynamic']['major']['archive']['jump_url']
+            BV = jump_url[len('//www.bilibili.com/video/'):-1]
+            jump_url = f'https://b23.tv/{BV}'
+        else:
+            jump_url = await get_b23_url(f"https://t.bilibili.com/{dynamic_id}")
+
         message = (
             MessageSegment.at(event.user_id)
             + f" {name} {type_msg.get(dyn['type'], type_msg[0])}：\n"
             + MessageSegment.image(shot_image)
             + f"\n"
-            + await get_b23_url(f"https://t.bilibili.com/{dynamic_id}")
+            + jump_url
         )
-        BV: str = ''
-        if dyn['type'] == 'DYNAMIC_TYPE_AV': # 视频动态的话附上BV号，app端可以直接打开视频
-            jump_url: str = dyn['modules']['module_dynamic']['major']['archive']['jump_url']
-            BV = jump_url[len('//www.bilibili.com/video/'):-1]
-            message += f'\n复制下方BV号，打开【B站APP】，直接观看视频！'
 
-        await vive.send(message)
-        if BV:
-            await asyncio.sleep(0.5)
-            await vive.send(BV)
-        return
+        return await vive.send(message)
         
     return await vive.send("该 UP 未发布任何动态")
