@@ -192,34 +192,6 @@ async def create_aweme_msg(dyn:Any) -> Message:
     else:
         video_url = f"https://www.douyin.com/video/{aweme_id}"
         return msg + video_url
-    
-# async def get_live_short_url(room_id, id_str) -> Optional[str]:
-#     """获取直播间短链"""
-#     url = (f"https://www.douyin.com/aweme/v1/web/web_shorten/?target=https://live.douyin.com/{room_id}?room_id={id_str}"
-#             + "&enter_from_merge=web_share_link&enter_method=web_share_link&previous_page=app_code_link")
-#     url = add_xbogus(url)
-
-#     headers = {
-#         'referer': f"https://live.douyin.com/{room_id}",
-#         'User-Agent': USER_AGENT
-#     }
-
-#     try:
-#         async with AsyncClient() as client:
-#             resp = await client.get(
-#                 url, headers=headers,
-#             )
-#         resp.encoding = "utf-8"
-#         resp_json = json.loads(resp.text)
-#         if 'data' not in resp_json or resp_json.get('message', '') == 'error':
-#             logger.error(f"获取直播间短链失败，: {resp_json['reason']}")
-#             return None
-#         else:
-#             return resp_json['data']
-#     except Exception as e:
-#         logger.error(f'获取直播间短链失败，可能是 X-Bogus 算法已过时: {e}')
-#         return None
-
 
 async def create_live_msg(user: User_dy, room_info: RoomInfo) -> Message:
     """生成直播分享x信息"""

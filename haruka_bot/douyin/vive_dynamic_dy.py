@@ -1,5 +1,6 @@
 
 from datetime import datetime
+import random
 from typing import List
 from loguru import logger
 from nonebot.matcher import matchers
@@ -56,4 +57,5 @@ async def _(
     except IndexError:
         return await vive_dy.send(MessageSegment.at(event.user_id) + " 你输入的数字过大，该 UP 的最后一页动态没有这么多条")
     
-    return await vive_dy.send(MessageSegment.at(event.user_id) + await create_aweme_msg(dyn))
+    # ios 要求第一个字符必须是数字才允许app读取剪贴板
+    return await vive_dy.send(f'{random.randint(1, 9)} ' + MessageSegment.at(event.user_id) + await create_aweme_msg(dyn))

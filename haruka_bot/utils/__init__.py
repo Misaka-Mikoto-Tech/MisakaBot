@@ -150,7 +150,7 @@ def to_me():
     return Rule(_to_me)
 
 
-async def safe_send(bot_id, send_type, type_id, message, at=False):
+async def safe_send(bot_id, send_type, type_id, message, at=False, prefix = None):
     """发送出现错误时, 尝试重新发送, 并捕获异常且不会中断运行"""
 
     async def _safe_send(bot, send_type, type_id, message):
@@ -184,6 +184,8 @@ async def safe_send(bot_id, send_type, type_id, message, at=False):
                 or (await bot.get_group_at_all_remain(group_id=type_id))["can_at_all"]
             ):
                 message = MessageSegment.at("all") + message
+            if prefix:
+                message = prefix + message
             try:
                 result = await _safe_send(bot, send_type, type_id, message)
                 logger.info(f"尝试使用 Bot（{bot_id}）推送成功")
@@ -199,6 +201,8 @@ async def safe_send(bot_id, send_type, type_id, message, at=False):
     ):
         message = MessageSegment.at("all") + message
 
+    if prefix:
+        message = prefix + message
     try:
         return await _safe_send(bot, send_type, type_id, message)
     except ActionFailed as e:
