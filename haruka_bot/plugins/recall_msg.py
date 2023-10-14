@@ -1,9 +1,10 @@
 from nonebot.adapters.onebot.v11 import Bot, GroupMessageEvent
-from nonebot.plugin import on_command
+from nonebot.plugin import on_keyword
 from nonebot.matcher import Matcher
 from ..utils import permission_check, to_me
+from nonebot.log import logger
 
-on_recall = on_command("撤回消息", aliases={"recall_msg", "delete_msg"}, priority=5, block=True)
+on_recall = on_keyword({"撤回消息"}, priority=5, block=True)
 on_recall.__doc__ = "撤回消息"
 
 @on_recall.handle()
