@@ -2,6 +2,7 @@ function removeExtraDoms() {
     const doms = [
         '.js-header-wrapper',
         '.gh-header-actions',
+        // '#repos-sticky-header',
         'nav.js-repo-nav',
         '.Layout-sidebar',
         '.discussion-timeline-actions',
@@ -11,11 +12,19 @@ function removeExtraDoms() {
     doms.forEach(domTag => {
         const domDel = document.querySelector(domTag);
         domDel && domDel.remove()
-    })
+    });
 
     // 让主讨论区覆盖整个宽度
     let layout = document.querySelector('div.Layout');
     layout && (layout.style.display = 'block');
+
+    // 移除 file-tree
+    let fileTree = document.getElementById('repos-file-tree');
+    fileTree && (fileTree.parentElement.parentElement.parentElement.parentElement.remove());
+
+    // 移除搜索框
+    let searchBox = document.getElementById('StickyHeader');
+    searchBox && (searchBox.firstChild.firstChild.childNodes[1].remove());
 
     /**
      * 底部加一些空白

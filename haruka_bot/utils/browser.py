@@ -249,7 +249,7 @@ async def check_playwright_env():
 async def get_github_screenshot(url: str):
     """github issue, pr截图"""
 
-    assert('/issues/' in url or '/pull/' in url)
+    assert(re.search('/issues/|/pull/|/blob/', url))
 
     if config.haruka_browser_ua:
         user_agent = config.haruka_browser_ua
