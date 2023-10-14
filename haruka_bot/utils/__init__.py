@@ -97,7 +97,7 @@ async def permission_check(
     bot: Bot,
     event: Union[GroupMessageEvent, GroupMessageSentEvent, PrivateMessageEvent, GuildMessageEvent]
 ):
-    """检查推送相关操作是否有权限"""
+    """检查推送相关操作是否有权限，无权限时抛出 FinishedException 异常"""
     bot_id = int(bot.self_id)
     async def check_exclusive_bot():
         if (bot_id in config.exclusive_bots) and (event.sender.user_id != bot_id):
