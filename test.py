@@ -62,8 +62,11 @@ async def screenshot(url):
         await page.close()
         await context.close()
 
-asyncio.run(screenshot('https://github.com/linxinrao/Shamrock/blob/master/xposed/src/main/java/moe/fuqiuluo/shamrock/remote/service/WebSocketClientService.kt#L115-L125'))
-asyncio.run(screenshot('https://github.com/linxinrao/Shamrock/issues/104'))
-asyncio.run(screenshot('https://github.com/linxinrao/Shamrock/blob/master/app/build.gradle.kts#L181'))
+# asyncio.run(screenshot('https://github.com/linxinrao/Shamrock/blob/master/xposed/src/main/java/moe/fuqiuluo/shamrock/remote/service/WebSocketClientService.kt#L115-L125'))
+# asyncio.run(screenshot('https://github.com/linxinrao/Shamrock/issues/104'))
+# asyncio.run(screenshot('https://github.com/linxinrao/Shamrock/blob/master/app/build.gradle.kts#L181'))
 
-assert(re.search('^(/issues/|/pull/|/blob/', 'https://github.com/linxinrao/Shamrock/pull/104'))
+# assert(re.search('^(/issues/|/pull/|/blob/', 'https://github.com/linxinrao/Shamrock/pull/104'))
+
+text = '撤回'
+print(text != '撤回')
