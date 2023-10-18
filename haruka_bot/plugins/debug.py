@@ -11,7 +11,7 @@ from ..utils import on_command, to_me, text_to_img
 from ..version import __version__
 from .. import config
 
-debug = on_command("debug", rule=to_me(), permission=SUPERUSER, priority=2, block=True)
+debug = on_command("debug", permission=SUPERUSER, priority=2, block=True)
 
 @debug.handle()
 async def _(event: GroupMessageEvent, bot:Bot, matcher: Matcher, arg: Message = CommandArg()):
