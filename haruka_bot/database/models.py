@@ -68,7 +68,7 @@ class User(BaseModel):
     name = CharField(max_length=20)
 
 class User_dy(BaseModel):
-    sec_uid = CharField(max_length=100)
+    sec_uid = CharField(max_length=100, pk=True)
     name = CharField(max_length=100)
     room_id = IntField(default=0)
     live_url = CharField(max_length=100)
