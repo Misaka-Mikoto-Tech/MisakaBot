@@ -268,16 +268,23 @@ async def get_github_screenshot(url: str):
     page = await context.new_page()
 
     try:
-        await page.goto(
-                url,
-                wait_until="networkidle",
-                timeout=config.haruka_dynamic_timeout * 1000,
-            )
+        try:
+            await page.goto(
+                    url,
+                    wait_until="networkidle",
+                    timeout=config.haruka_dynamic_timeout * 1000,
+                )
+            load_success = True
+        except Exception as e0:
+            load_success = False
+            logger.error(f'访问github页面出错, 尝试继续执行: {e0.args}')
+
         await page.add_script_tag(path= github_js)
         await page.evaluate('removeExtraDoms()')
 
-        await page.wait_for_load_state("networkidle")
-        await page.wait_for_load_state("domcontentloaded")
+        if load_success:
+            await page.wait_for_load_state("networkidle")
+            await page.wait_for_load_state("domcontentloaded")
 
         body = await page.query_selector('body')
         body_clip = await body.bounding_box() if body else None

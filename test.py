@@ -34,16 +34,22 @@ async def screenshot(url):
     page = await context.new_page()
 
     try:
-        await page.goto(
-                url,
-                wait_until="networkidle",
-            )
+        try:
+            await page.goto(
+                    url,
+                    wait_until="networkidle",
+                )
+            load_success = True
+        except Exception as e0:
+            load_success = False
+            logger.error(f'访问github页面出错, 尝试继续执行: {e0.args}')
+
         await page.add_script_tag(path= str(Path(__file__).parent) + '/haruka_bot/utils/github_page.js')
         await page.evaluate('removeExtraDoms()')
 
-        await page.wait_for_load_state("networkidle")
-        await page.wait_for_load_state("domcontentloaded")
-        await asyncio.sleep(0.1)
+        if load_success:
+            await page.wait_for_load_state("networkidle")
+            await page.wait_for_load_state("domcontentloaded")
 
         body = await page.query_selector('body')
         body_clip = await body.bounding_box() if body else None
@@ -64,9 +70,8 @@ async def screenshot(url):
 
 # asyncio.run(screenshot('https://github.com/linxinrao/Shamrock/blob/master/xposed/src/main/java/moe/fuqiuluo/shamrock/remote/service/WebSocketClientService.kt#L115-L125'))
 # asyncio.run(screenshot('https://github.com/linxinrao/Shamrock/issues/104'))
+# asyncio.run(screenshot('https://github.com/yoimiya-kokomi/Miao-Yunzai/blob/master/lib/plugins/plugin.js#L67'))
+asyncio.run(screenshot('https://github.com/Mrs4s/go-cqhttp/issues/2471'))
 # asyncio.run(screenshot('https://github.com/linxinrao/Shamrock/blob/master/app/build.gradle.kts#L181'))
 
 # assert(re.search('^(/issues/|/pull/|/blob/', 'https://github.com/linxinrao/Shamrock/pull/104'))
-
-text = '撤回'
-print(text != '撤回')
