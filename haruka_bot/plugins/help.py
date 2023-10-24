@@ -45,7 +45,7 @@ async def _(event: MessageEvent, bot:Bot):
                     plugin_names.append(f"关注|取关{func_name}")
 
     message += '\n'.join(plugin_names) + "\n"
-    message += "点歌\n"
+    message += "网易点歌\n"
     message += "绘画\n------------------------\n"
     message += "示例：开启动态 123456\n"
     message += "Tips：只发送 \"绘画\" 两个字将显示详细绘画帮助内容\n"
