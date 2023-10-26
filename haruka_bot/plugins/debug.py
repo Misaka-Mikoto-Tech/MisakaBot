@@ -40,23 +40,24 @@ async def _ping(url: str)->str:
     msg = f'ping {url}\n'
     if not url.startswith('http'):
         url = 'http://' + url # 绝大多数网站都支持 http
+    # 首先尝试不使用代理的延迟
     try:
-        # 首先尝试不使用代理
         dt = time.time()
         async with AsyncClient() as client:
             await client.head(url=url, timeout=5)
         span = int((time.time() - dt) * 1000)
         msg += f'direct: {span}ms\n'
     except TransportError as e:
-        # 出错后尝试使用代理
         msg += 'direct: timeout\n'
-        try:
-            dt = time.time()
-            async with AsyncClient(proxies=config.overseas_proxy) as client:
-                await client.head(url=url, timeout=5)
-            span = int((time.time() - dt) * 1000)
-            msg += f'proxy: {span}ms'
-        except TransportError as e:
-            msg += 'proxy: timeout'
+
+    # 再测试使用代理的延迟
+    try:
+        dt = time.time()
+        async with AsyncClient(proxies=config.overseas_proxy) as client:
+            await client.head(url=url, timeout=5)
+        span = int((time.time() - dt) * 1000)
+        msg += f'proxy: {span}ms'
+    except TransportError as e:
+        msg += 'proxy: timeout'
 
     return msg.strip()
