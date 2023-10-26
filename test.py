@@ -2,7 +2,7 @@ import asyncio
 import re
 from pathlib import Path
 from bilireq.live import get_rooms_info_by_uids
-from httpx import AsyncClient
+from httpx import AsyncClient, TransportError
 # from nonebot.adapters.onebot.v11.message import MessageSegment
 from nonebot.log import logger
 
@@ -11,7 +11,6 @@ from nonebot.log import logger
 #from utils import PROXIES, safe_send, scheduler
     
 from dataclasses import dataclass, astuple
-import time
 from typing import Any, Dict, Mapping, Union
 
 import collections
@@ -71,7 +70,16 @@ async def screenshot(url):
 # asyncio.run(screenshot('https://github.com/linxinrao/Shamrock/blob/master/xposed/src/main/java/moe/fuqiuluo/shamrock/remote/service/WebSocketClientService.kt#L115-L125'))
 # asyncio.run(screenshot('https://github.com/linxinrao/Shamrock/issues/104'))
 # asyncio.run(screenshot('https://github.com/yoimiya-kokomi/Miao-Yunzai/blob/master/lib/plugins/plugin.js#L67'))
-asyncio.run(screenshot('https://github.com/Mrs4s/go-cqhttp/issues/2471'))
+# asyncio.run(screenshot('https://github.com/Mrs4s/go-cqhttp/issues/2471'))
 # asyncio.run(screenshot('https://github.com/linxinrao/Shamrock/blob/master/app/build.gradle.kts#L181'))
 
 # assert(re.search('^(/issues/|/pull/|/blob/', 'https://github.com/linxinrao/Shamrock/pull/104'))
+async def test():
+    try:
+        async with AsyncClient() as client:
+            await client.options('https://www.baiduxxxx.com', timeout=10)
+    except TransportError as e:
+        print('timeout')
+
+
+asyncio.run(test())

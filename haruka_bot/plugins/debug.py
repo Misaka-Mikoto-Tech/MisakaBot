@@ -1,5 +1,6 @@
 import time
 from typing import List
+from httpx import AsyncClient, TransportError
 from nonebot.matcher import matchers
 from nonebot.adapters.onebot.v11 import Bot, MessageSegment
 from nonebot.adapters.onebot.v11.event import GroupMessageEvent, Reply
@@ -27,3 +28,35 @@ async def _(event: GroupMessageEvent, bot:Bot, matcher: Matcher, argMsg: Message
         if arg == 'time':
             now = time.localtime(time.time())
             await matcher.finish(time.strftime("%Y-%m-%d %H:%M:%S", now))
+        elif arg.startswith('ping'):
+            (_, url) = arg.split(' ')
+            if not url:
+                await matcher.finish('获取地址失败')
+            await matcher.finish(await _ping(url=url))
+
+async def _ping(url: str)->str:
+    """使用 http head 模拟ping指定地址"""
+
+    msg = f'ping {url}\n'
+    if not url.startswith('http'):
+        url = 'http://' + url # 绝大多数网站都支持 http
+    try:
+        # 首先尝试不使用代理
+        dt = time.time()
+        async with AsyncClient() as client:
+            await client.head(url=url, timeout=5)
+        span = int((time.time() - dt) * 1000)
+        msg += f'direct: {span}ms\n'
+    except TransportError as e:
+        # 出错后尝试使用代理
+        msg += 'direct: timeout\n'
+        try:
+            dt = time.time()
+            async with AsyncClient(proxies=config.overseas_proxy) as client:
+                await client.head(url=url, timeout=5)
+            span = int((time.time() - dt) * 1000)
+            msg += f'proxy: {span}ms'
+        except TransportError as e:
+            msg += 'proxy: timeout'
+
+    return msg.strip()
