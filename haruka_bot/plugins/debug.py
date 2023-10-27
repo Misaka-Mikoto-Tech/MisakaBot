@@ -28,7 +28,7 @@ async def _(event: GroupMessageEvent, bot:Bot, matcher: Matcher, argMsg: Message
             user_id = event.reply.sender.user_id
             if (not nickname) and user_id:
                 nickname = (await bot.get_group_member_info(group_id=event.group_id, user_id=user_id))['nickname']
-            await matcher.finish(nickname or '获取昵称失败')
+            await matcher.finish(f"{nickname}\n{nickname.encode('unicode_escape')}" if nickname else '获取昵称失败')
         else:
             await matcher.finish('{' + str(event.reply) +'}')
     else:
