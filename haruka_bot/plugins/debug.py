@@ -18,11 +18,17 @@ debug = on_command("debug", permission=SUPERUSER | GROUP_ADMIN | GROUP_OWNER, pr
 
 @debug.handle()
 async def _(event: GroupMessageEvent, bot:Bot, matcher: Matcher, argMsg: Message = CommandArg()):
-    """输出回复的原始消息内容"""
     arg = argMsg.extract_plain_text().strip()
     if event.reply:
+        # 根据参数输出回复的原始消息内容
         if arg == 'echo':
             await matcher.finish(event.reply.message)
+        elif arg == 'nickname':
+            nickname = event.reply.sender.nickname
+            user_id = event.reply.sender.user_id
+            if (not nickname) and user_id:
+                nickname = (await bot.get_group_member_info(group_id=event.group_id, user_id=user_id))['nickname']
+            await matcher.finish(nickname or '获取昵称失败')
         else:
             await matcher.finish('{' + str(event.reply) +'}')
     else:
@@ -50,6 +56,8 @@ async def _ping(url: str)->str:
         msg += f'direct: {span}ms\n'
     except TransportError as e:
         msg += 'direct: timeout\n'
+    except Exception as e:
+        msg += f'direct: {e.args}'
 
     # 再测试使用代理的延迟
     try:
@@ -60,5 +68,7 @@ async def _ping(url: str)->str:
         msg += f'proxy: {span}ms'
     except TransportError as e:
         msg += 'proxy: timeout'
+    except Exception as e:
+        msg += f'proxy: {e.args}'
 
     return msg.strip()
