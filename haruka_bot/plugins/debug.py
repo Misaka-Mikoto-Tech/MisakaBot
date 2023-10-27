@@ -79,8 +79,10 @@ async def debug_help_menu()->MessageSegment:
     """debug的帮助菜单"""
     msg = "debug 指令列表\n"
     msg += "# 引用消息时\n"
-    msg += "  echo: 发送被引用的消息\n"
     msg += "  '': 无参数，发送被引用消息的原始字符串\n"
+    msg += "  echo: 发送被引用的消息\n"
+    msg += "  nickname: 发送被引用消息的用户nickname\n"
+    
     msg += "# 没有引用消息时\n"
     msg += "  time: 发送bot时间\n"
     msg += "  ping: ping指定地址\n"
