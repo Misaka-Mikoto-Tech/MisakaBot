@@ -40,6 +40,8 @@ async def _(event: GroupMessageEvent, bot:Bot, matcher: Matcher, argMsg: Message
             if not url:
                 await matcher.finish('获取地址失败')
             await matcher.finish(await _ping(url=url))
+        else:
+            await matcher.finish(await debug_help_menu())
 
 async def _ping(url: str)->str:
     """使用 http head 模拟ping指定地址"""
@@ -72,3 +74,16 @@ async def _ping(url: str)->str:
         msg += f'proxy: {e.args}'
 
     return msg.strip()
+
+async def debug_help_menu()->MessageSegment:
+    """debug的帮助菜单"""
+    msg = "debug 指令列表\n"
+    msg += "# 引用消息时\n"
+    msg += "  echo: 发送被引用的消息\n"
+    msg += "  '': 无参数，发送被引用消息的原始字符串\n"
+    msg += "# 没有引用消息时\n"
+    msg += "  time: 发送bot时间\n"
+    msg += "  ping: ping指定地址\n"
+
+    message = MessageSegment.image(await text_to_img(msg, width=425))
+    return message
