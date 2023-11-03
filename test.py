@@ -75,11 +75,17 @@ async def screenshot(url):
 
 # assert(re.search('^(/issues/|/pull/|/blob/', 'https://github.com/linxinrao/Shamrock/pull/104'))
 async def test():
-    try:
-        async with AsyncClient() as client:
-            await client.options('https://www.baiduxxxx.com', timeout=10)
-    except TransportError as e:
-        print('timeout')
+    vive_text = 'unity china   10'
 
+    args = vive_text.split(' ')
+    if args[-1].isdigit():
+        user_name = vive_text[:vive_text.rfind(' ')].strip()
+        offset_num = int(args[-1])
+    else:
+        user_name = vive_text
+        offset_num = 0
+
+    print(f'[{user_name}]')
+    print(offset_num)
 
 asyncio.run(test())

@@ -30,10 +30,17 @@ async def _(
 async def _(
     matcher: Matcher, event: MessageEvent, bot:Bot, arg: str = ArgPlainText("arg")
 ):
-    vive_texts = arg.strip().split(' ')
-    logger.info(f"接收到抖音查询数据:{vive_texts}")
+    vive_text = arg.strip()
+    logger.info(f"接收到抖音查询数据:{vive_text}")
 
-    user_name = vive_texts[0]
+    args = vive_text.split(' ')
+    if args[-1].isdigit():
+        user_name = vive_text[:vive_text.rfind(' ')].strip()
+        offset_num = int(args[-1])
+    else:
+        user_name = vive_text
+        offset_num = 0
+
     if not (sec_uid := await get_sec_user_id(user_name)):
         return await vive_dy.send(MessageSegment.at(event.user_id) + " 未找到该 UP，请输入正确的UP 名、UP UID或 UP 首页链接")
 
@@ -50,7 +57,6 @@ async def _(
         return await vive_dy.send("该 UP 未发布任何作品")
     
     aweme_list = sorted(aweme_list, key=lambda x: int(x["aweme_id"]), reverse=True)
-    offset_num = int(vive_texts[1]) if len(vive_texts) > 1 else 0
 
     try:
         dyn = aweme_list[offset_num]

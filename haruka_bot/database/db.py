@@ -537,6 +537,10 @@ class DB:
             if live_list[i] in no_live_sets:
                 del live_list[i]
 
+        # 去重
+        uid_list_dy["dynamic"]["list"] = list(set(uid_list_dy["dynamic"]["list"]))
+        uid_list_dy["live"]["list"] = list(set(uid_list_dy["live"]["list"]))
+
     async def backup(self):
         """备份数据库"""
         pass

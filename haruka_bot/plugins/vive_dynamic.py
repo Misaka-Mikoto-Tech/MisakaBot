@@ -33,18 +33,22 @@ async def _(
 async def _(
     matcher: Matcher, event: MessageEvent, bot:Bot, arg: str = ArgPlainText("arg")
 ):
-    vive_texts = arg.strip().split(' ')
-    logger.info(f"接收到查询数据:{vive_texts}")
+    vive_text = arg.strip()
+    logger.info(f"接收到查询数据:{vive_text}")
 
-    # if not bili_auth.is_logined:
-    #     await vive.finish("未登录B站账号，请先登录")
+    args = vive_text.split(' ')
+    if args[-1].isdigit():
+        user_name = vive_text[:vive_text.rfind(' ')].strip()
+        offset_num = int(args[-1])
+    else:
+        user_name = vive_text
+        offset_num = 0
 
-    name = vive_texts[0]
-    if not (uid := await uid_extract(name)):
+    if not (uid := await uid_extract(user_name)):
         return await vive.send(MessageSegment.at(event.user_id) + " 未找到该 UP，请输入正确的UP 名、UP UID或 UP 首页链接")
 
     if isinstance(uid, list):
-        return await vive.send(MessageSegment.at(event.user_id) + f" 未找到{name}, 你是否想要找:\n" + '\n'.join([item['uname'] for item in uid[:10] ]))
+        return await vive.send(MessageSegment.at(event.user_id) + f" 未找到{user_name}, 你是否想要找:\n" + '\n'.join([item['uname'] for item in uid[:10] ]))
     elif int(uid) == 0:
         return await vive.send(MessageSegment.at(event.user_id) + " UP 主不存在")
 
@@ -66,8 +70,6 @@ async def _(
     except Exception as e:
         return await vive.send(MessageSegment.at(event.user_id) + f" 获取动态失败：{e}")
 
-    offset_num = int(vive_texts[1]) if len(vive_texts) > 1 else 0
-
     if dynamics:
         dynamics = sorted(dynamics, key=lambda x: int(x["id_str"]), reverse=True)
         # Path('./bili_dynamics.json').write_text(json.dumps(dynamics, indent=2,ensure_ascii=False))
@@ -79,7 +81,7 @@ async def _(
         dynamic_id = int(dyn["id_str"])
         shot_image = await get_dynamic_screenshot(dynamic_id)
         if shot_image is None:
-            return await vive.send(MessageSegment.at(event.user_id) + f" 获取{name}动态失败")
+            return await vive.send(MessageSegment.at(event.user_id) + f" 获取{user_name}动态失败")
         type_msg = {
                 0: "发布了新动态",
                 "DYNAMIC_TYPE_FORWARD": "转发了一条动态",
@@ -99,7 +101,7 @@ async def _(
 
         message = (
             MessageSegment.at(event.user_id)
-            + f" {name} {type_msg.get(dyn['type'], type_msg[0])}：\n"
+            + f" {user_name} {type_msg.get(dyn['type'], type_msg[0])}：\n"
             + MessageSegment.image(shot_image)
             + f"\n"
             + jump_url
