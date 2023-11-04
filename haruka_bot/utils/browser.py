@@ -251,6 +251,8 @@ async def get_github_screenshot(url: str):
 
     assert(re.search('/issues/|/pull/|/blob/', url))
 
+    PAGE_WIDTH = 800
+
     if config.haruka_browser_ua:
         user_agent = config.haruka_browser_ua
     else:
@@ -263,7 +265,7 @@ async def get_github_screenshot(url: str):
         proxy={"server": config.overseas_proxy} if config.overseas_proxy else None,
         device_scale_factor=2,
         user_agent=user_agent,
-        viewport={"width": 800, "height": 600},
+        viewport={"width": PAGE_WIDTH, "height": 600},
         )
     page = await context.new_page()
 
@@ -280,7 +282,8 @@ async def get_github_screenshot(url: str):
             logger.error(f'访问github页面出错, 尝试继续执行: {e0.args}')
 
         await page.add_script_tag(path= github_js)
-        await page.evaluate('removeExtraDoms()')
+        page_height = await page.evaluate('removeExtraDoms()')
+        await page.set_viewport_size({"width": PAGE_WIDTH, "height": page_height})
 
         if load_success:
             await page.wait_for_load_state("networkidle")
@@ -291,6 +294,7 @@ async def get_github_screenshot(url: str):
         if body_clip:
             body_clip['x'] = 0.0
             body_clip['y'] = 0.0
+            body_clip["height"] = min(body_clip["height"], 32766)  # 限制高度
         screenshot = await page.screenshot(clip=body_clip, full_page=True)
         return screenshot
 
