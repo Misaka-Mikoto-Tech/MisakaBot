@@ -97,4 +97,5 @@ async def live_sched():
                 message=real_live_msg,
                 at=bool(sets.at) if new_status else False,  # 下播不@全体
             )
+            await asyncio.sleep(0.7)
         await db.update_user(int(uid), name)

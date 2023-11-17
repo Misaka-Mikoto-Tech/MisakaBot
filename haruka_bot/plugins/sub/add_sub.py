@@ -35,8 +35,26 @@ async def _(
 async def _(event: MessageEvent, user_name: str = ArgPlainText("user_name")):
     """根据 用户名 订阅 UP 主"""
     user_name = user_name.strip()
-    if not (uid := await uid_extract(user_name)):
-        return await add_sub.send(MessageSegment.at(event.user_id) + " 未找到该 UP，请输入正确的UP 名、UP UID或 UP 首页链接")
+    if user_name.isdigit(): # 如果发送的是 uid, 则去获取用户名
+        uid = int(user_name)
+        user = await db.get_user(uid=uid)
+        user_name = user and user.name or ''
+        if not user_name:
+            try:
+                user_name = (await get_user_info(uid, proxies=PROXIES, auth=bili_auth.auth))["name"]
+            except ResponseCodeError as e:
+                if e.code == -400 or e.code == -404:
+                    await add_sub.finish("UID不存在，注意UID不是房间号")
+                elif e.code == -412:
+                    await add_sub.finish("操作过于频繁IP暂时被风控，请半小时后再尝试")
+                else:
+                    await add_sub.finish(
+                        f"未知错误，请联系开发者反馈，错误内容：\n\
+                                        {str(e)}"
+                    )
+    else: # 发送的是用户名，则去获取 uid
+        if not (uid := await uid_extract(user_name)):
+            return await add_sub.send(MessageSegment.at(event.user_id) + " 未找到该 UP，请输入正确的UP 名、UP UID或 UP 首页链接")
     
     if isinstance(uid, list):
         return await add_sub.send(MessageSegment.at(event.user_id) + f" 未找到{user_name}, 你是否想要找:\n" + '\n'.join([item['uname'] for item in uid[:10] ]))

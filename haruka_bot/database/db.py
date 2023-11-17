@@ -367,7 +367,11 @@ class DB:
         await Sub_dy.update(q, **q, name = name)
 
         q = {"sec_uid":kwargs["sec_uid"]}
-        await User_dy.update(q, name=name, room_id=kwargs["room_id"], live_url=kwargs["live_url"])
+        live_url = kwargs["live_url"]
+        if live_url:
+            await User_dy.update(q, name=name, room_id=kwargs["room_id"], live_url=kwargs["live_url"])
+        else:
+            await User_dy.update(q, name=name, room_id=kwargs["room_id"])
         await cls.update_uid_list_dy()
 
     @classmethod

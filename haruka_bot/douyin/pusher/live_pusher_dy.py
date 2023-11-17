@@ -21,7 +21,7 @@ from ..utils_dy import cookie_utils, create_live_msg
 @dataclass
 class LiveStatusData:
     """直播间状态数据"""
-    is_streaming:bool # 是否在直播
+    is_streaming:bool = False # 是否在直播
     online_time:float = 0
     offline_time:float = 0
 
@@ -59,14 +59,15 @@ async def live_sched_dy():
     
     new_status = await room_info.is_going_on_live()
     if sec_uid not in all_status:
-        all_status[sec_uid] = LiveStatusData(new_status)
+        # bot 开启时正在直播的将bot启动时间设置为开播时间
+        all_status[sec_uid] = LiveStatusData(new_status, time.time() if new_status else 0)
         return
     
     status_data = all_status[sec_uid] 
     old_status = status_data.is_streaming
     if new_status == old_status:  # 直播间状态无变化
         return
-    all_status[sec_uid].is_streaming = new_status
+    status_data.is_streaming = new_status
 
     if new_status:  # 开播
         status_data.online_time = time.time()
@@ -74,12 +75,13 @@ async def live_sched_dy():
         live_msg = await create_live_msg(user, room_info)
     else:  # 下播
         status_data.offline_time = time.time()
-        logger.info(f"检测到下播：{user.name}({user.room_id})")
+        online_time_str = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(status_data.online_time))
+        logger.info(f"检测到抖音下播：{user.name}({user.room_id}), 开播时间:{online_time_str}")
 
         if status_data.online_time > 0:
-            live_msg = f"{user.name} 下播了\n本次直播时长 {format_time_span(status_data.offline_time - status_data.online_time)}"
+            live_msg = f"{user.name} 抖音下播了\n本次直播时长 {format_time_span(status_data.offline_time - status_data.online_time)}"
         else:
-            live_msg = f"{user.name} 下播了"
+            live_msg = f"{user.name} 抖音下播了"
 
     # 推送
     push_list = await db.get_push_list_dy(sec_uid)
@@ -92,6 +94,7 @@ async def live_sched_dy():
             at=False,
             prefix=f'{random.randint(1, 9)} 'if new_status else None, # ios 要求第一个字符必须是数字才允许app读取剪贴板
         )
+        await asyncio.sleep(0.7)
 
 
 @scheduler.scheduled_job("interval", seconds=3.5 * 3600, id="live_sched_dy_auto_get_cookie")
