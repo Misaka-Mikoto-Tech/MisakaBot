@@ -75,6 +75,12 @@ async def _ping(url: str)->str:
 
     return msg.strip()
 
+async def _bili_live_info(bot_id:int, group_id:int):
+    """打印当前群组订阅的直播up信息"""
+
+async def _dy_live_info(bot_id:int, group_id:int):
+    """打印当前群组订阅的直播up信息"""
+
 async def debug_help_menu()->MessageSegment:
     """debug的帮助菜单"""
     msg = "debug 指令列表\n"

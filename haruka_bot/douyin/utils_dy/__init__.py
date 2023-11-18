@@ -14,7 +14,6 @@ from httpx import AsyncClient
 from nonebot import logger
 from nonebot.adapters.onebot.v11 import Bot, MessageSegment, Message
 
-from ...database.models import User_dy
 from .cookie_utils import auto_get_cookie
 from ..core.dy_api import get_random_ua, get_request_headers
 from ..core.room_info import RoomInfo
@@ -192,25 +191,6 @@ async def create_aweme_msg(dyn:Any) -> Message:
     else:
         video_url = f"https://www.douyin.com/video/{aweme_id}"
         return msg + video_url
-
-async def create_live_msg(user: User_dy, room_info: RoomInfo) -> Message:
-    """生成直播分享x信息"""
-    # https://live.douyin.com/824433208053?room_id=7282413254901533479&enter_from_merge=web_share_link&enter_method=web_share_link&previous_page=app_code_link
-    # 1- #在抖音，记录美好生活#【一吱大仙】正在直播，来和我一起支持Ta吧。复制下方链接，打开【抖音】，直接观看直播！ https://v.douyin.com/ieGsnGsm/ 8@5.com 02/11
-
-    title = room_info.get_title()
-    cover = room_info.get_cover_url()
-
-    if user.live_url:
-        share_msg = (f"\n{random.randint(1, 9)}- #在抖音，记录美好生活#【{user.name}】正在直播，来和我一起支持Ta吧。复制下方链接，打开【抖音】，直接观看直播！ {user.live_url}"
-                     f" {random.randint(1, 9)}@{random.randint(1, 9)}.com {random.randint(1, 11):02}/{random.randint(1, 11):02}")
-    else:
-        share_msg = f"https://live.douyin.com/{user.room_id}"
-
-    live_msg = (
-        f"{user.name} 正在直播\n--------------------\n标题：{title}\n" + MessageSegment.image(cover) + f"\n{share_msg}"
-    )
-    return live_msg
 
 async def get_room_id_and_sec_uid_from_live_url(live_url: str) -> Tuple[int, str]:
     """通过直播间短链获取直播间号和 sec_uid"""
