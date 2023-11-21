@@ -10,14 +10,16 @@ from tortoise.connection import connections
 
 from ..utils import get_path
 from ..version import VERSION as HBVERSION
-from .models import Group, Guild, Sub, Sub_dy, User, User_dy, Version
+from .models import Group, Guild, Sub, Sub_dy, Sub_weibo, User, User_dy, User_weibo, Version
 
 uid_list = {"live": {"list": [], "index": 0}, "dynamic": {"list": [], "index": 0}}
 dynamic_offset = {} # {uid:latest_dynamic_id}
 
-uid_list_dy = {"live": {"list": [], "index": 0}, "dynamic": {"list": [], "index": 0}} # list: [sec_uid}]
+uid_list_dy = {"live": {"list": [], "index": 0}, "dynamic": {"list": [], "index": 0}} # list: [sec_uid]
 dynamic_offset_dy = {} # {sec_id:latest_dynamic_id}
 
+uid_list_weibo = {"dynamic": {"list": [], "index": 0}} # list: [uid]
+dynamic_offset_weibo = {} # {uid:latest_dynamic_id}
 
 class DB:
     """数据库交互类，与增删改查无关的部分不应该在这里面实现"""
@@ -50,6 +52,7 @@ class DB:
         await cls.migrate()
         await cls.update_uid_list()
         await cls.update_uid_list_dy()
+        await cls.update_uid_list_weibo()
 
     @classmethod
     async def get_user(cls, **kwargs):
@@ -60,6 +63,11 @@ class DB:
     async def get_user_dy(cls, **kwargs):
         """获取抖音 UP 主信息"""
         return await User_dy.get(**kwargs).first()
+    
+    @classmethod
+    async def get_user_weibo(cls, **kwargs):
+        """获取微博 UP 主信息"""
+        return await User_weibo.get(**kwargs).first()
 
     @classmethod
     async def get_name(cls, uid) -> Optional[str]:
@@ -71,12 +79,20 @@ class DB:
     
     @classmethod
     async def get_name_dy(cls, sec_uid) -> Optional[str]:
-        """获取 UP 主昵称"""
+        """获取抖音 UP 主昵称"""
         user = await cls.get_user_dy(sec_uid=sec_uid)
         if user:
             return user.name
         return None
 
+    @classmethod
+    async def get_name_weibo(cls, uid) -> Optional[str]:
+        """获取微博 UP 主昵称"""
+        user = await cls.get_user_weibo(uid=uid)
+        if user:
+            return user.name
+        return None
+    
     @classmethod
     async def add_user(cls, **kwargs):
         """添加 UP 主信息"""
@@ -87,6 +103,11 @@ class DB:
         """添加抖音 UP 主信息"""
         return await User_dy.add(**kwargs)
 
+    @classmethod
+    async def add_user_weibo(cls, **kwargs):
+        """添加微博 UP 主信息"""
+        return await User_weibo.add(**kwargs)
+    
     @classmethod
     async def delete_user(cls, uid) -> bool:
         """删除 UP 主信息"""
@@ -104,6 +125,15 @@ class DB:
             return False
         await User_dy.delete(sec_uid=sec_uid)
         return True
+    
+    @classmethod
+    async def delete_user_weibo(cls, uid) -> bool:
+        """删除微博 UP 主信息"""
+        if await cls.get_sub_weibo(uid=uid):
+            # 还存在该微博 UP 主订阅，不能删除
+            return False
+        await User_weibo.delete(uid=uid)
+        return True
 
     @classmethod
     async def update_user(cls, uid: int, name: str) -> bool:
@@ -118,6 +148,14 @@ class DB:
         """更新抖音 UP 主信息"""
         if await cls.get_user_dy(sec_uid=sec_uid):
             await User_dy.update({"sec_uid": sec_uid}, name=name)
+            return True
+        return False
+    
+    @classmethod
+    async def update_user_weibo(cls, uid: str, name: str) -> bool:
+        """更新微博 UP 主信息"""
+        if await cls.get_user_weibo(uid=uid):
+            await User_weibo.update({"uid": uid}, name=name)
             return True
         return False
 
@@ -306,6 +344,11 @@ class DB:
     async def get_sub_dy(cls, **kwargs):
         """获取指定位置的抖音订阅信息"""
         return await Sub_dy.get(**kwargs).first()
+    
+    @classmethod
+    async def get_sub_weibo(cls, **kwargs):
+        """获取指定位置的微博订阅信息"""
+        return await Sub_weibo.get(**kwargs).first()
 
     @classmethod
     async def get_subs(cls, **kwargs):
@@ -314,6 +357,10 @@ class DB:
     @classmethod
     async def get_subs_dy(cls, **kwargs):
         return await Sub_dy.get(**kwargs)
+    
+    @classmethod
+    async def get_subs_weibo(cls, **kwargs):
+        return await Sub_weibo.get(**kwargs)
 
     @classmethod
     async def get_push_list(cls, uid, func) -> List[Sub]:
@@ -324,6 +371,11 @@ class DB:
     async def get_push_list_dy(cls, sec_uid: str) -> List[Sub_dy]:
         """根据抖音 sec_uid 获取需要推送的 QQ 列表"""
         return await cls.get_subs_dy(sec_uid=sec_uid)
+    
+    @classmethod
+    async def get_push_list_weibo(cls, uid: str) -> List[Sub_weibo]:
+        """根据微博 uid 获取需要推送的 QQ 列表"""
+        return await cls.get_subs_weibo(uid=uid)
 
     @classmethod
     async def get_sub_list(cls, type, type_id, bot_id) -> List[Sub]:
@@ -334,6 +386,11 @@ class DB:
     async def get_sub_list_dy(cls, group_id, bot_id) -> List[Sub_dy]:
         """获取指定群的抖音推送列表"""
         return await cls.get_subs_dy(group_id=group_id, bot_id=bot_id)
+    
+    @classmethod
+    async def get_sub_list_weibo(cls, group_id, bot_id) -> List[Sub_weibo]:
+        """获取指定群的微博推送列表"""
+        return await cls.get_subs_weibo(group_id=group_id, bot_id=bot_id)
 
     @classmethod
     async def add_sub(cls, *, name, **kwargs) -> bool:
@@ -360,6 +417,17 @@ class DB:
         return True
     
     @classmethod
+    async def add_sub_weibo(cls, **kwargs) -> bool:
+        """添加微博订阅"""
+        name = kwargs["name"]
+        q = {"group_id":kwargs["group_id"], "bot_id":kwargs["bot_id"], "uid":kwargs["uid"]}
+        if not await Sub_weibo.add(q, **kwargs):
+            return False
+        await cls.add_user_weibo(uid=kwargs["uid"], name=name, containerid=kwargs["containerid"])
+        await cls.update_uid_list_weibo()
+        return True
+    
+    @classmethod
     async def update_sub_dy(cls, **kwargs):
         """更新抖音订阅"""
         name = kwargs["name"]
@@ -373,6 +441,17 @@ class DB:
         else:
             await User_dy.update(q, name=name, room_id=kwargs["room_id"])
         await cls.update_uid_list_dy()
+
+    @classmethod
+    async def update_sub_weibo(cls, **kwargs):
+        """更新微博订阅"""
+        name = kwargs["name"]
+        q = {"group_id":kwargs["group_id"], "bot_id":kwargs["bot_id"], "uid":kwargs["uid"]}
+        await Sub_weibo.update(q, **q, name = name)
+
+        q = {"uid":kwargs["uid"]}
+        await User_weibo.update(q, name=name)
+        await cls.update_uid_list_weibo()
 
     @classmethod
     async def delete_sub(cls, uid, type, type_id, bot_id) -> bool:
@@ -390,6 +469,16 @@ class DB:
         if await Sub_dy.delete(sec_uid=sec_uid, group_id=group_id, bot_id=bot_id):
             await cls.delete_user_dy(sec_uid=sec_uid)
             await cls.update_uid_list_dy()
+            return True
+        # 抖音订阅不存在
+        return False
+    
+    @classmethod
+    async def delete_sub_weibo(cls, uid, group_id, bot_id) -> bool:
+        """删除指定微博订阅"""
+        if await Sub_weibo.delete(uid=uid, group_id=group_id, bot_id=bot_id):
+            await cls.delete_user_weibo(uid=uid)
+            await cls.update_uid_list_weibo()
             return True
         # 抖音订阅不存在
         return False
@@ -467,6 +556,11 @@ class DB:
         return uid_list_dy[func]["list"]
 
     @classmethod
+    async def get_uid_list_weibo(cls, func) -> List:
+        """根据类型获取需要爬取的微博 uid 列表(微博的func只有dynamic一个)"""
+        return uid_list_weibo[func]["list"]
+
+    @classmethod
     async def next_uid(cls, func):
         """获取下一个要爬取的 UID"""
         func = uid_list[func]
@@ -485,6 +579,21 @@ class DB:
     async def next_uid_dy(cls, func): # live, dynamic
         """获取下一个要爬取的抖音 sec_id"""
         func = uid_list_dy[func]
+        if func["list"] == []:
+            return None
+
+        if func["index"] >= len(func["list"]):
+            func["index"] = 1
+            return func["list"][0]
+        else:
+            index = func["index"]
+            func["index"] += 1
+            return func["list"][index]
+        
+    @classmethod
+    async def next_uid_weibo(cls, func): # dynamic
+        """获取下一个要爬取的微博 uid"""
+        func = uid_list_weibo[func]
         if func["list"] == []:
             return None
 
@@ -544,6 +653,25 @@ class DB:
         # 去重
         uid_list_dy["dynamic"]["list"] = list(set(uid_list_dy["dynamic"]["list"]))
         uid_list_dy["live"]["list"] = list(set(uid_list_dy["live"]["list"]))
+
+    @classmethod
+    async def update_uid_list_weibo(cls):
+        """更新需要推送的微博 UP 主列表"""
+        subs = Sub_weibo.all()
+        uid_list_weibo["dynamic"]["list"] = list(
+            set([sub.uid async for sub in subs])
+        )
+
+        # 清除没有订阅的 offset
+        dynamic_offset_weibo_keys = set(dynamic_offset_weibo)
+        dynamic_uids_weibo = set(uid_list_weibo["dynamic"]["list"])
+        for uid in dynamic_offset_weibo_keys - dynamic_uids_weibo:
+            del dynamic_offset_weibo[uid]
+        for uid in dynamic_uids_weibo - dynamic_offset_weibo_keys:
+            dynamic_offset_weibo[uid] = -1
+
+        # 去重
+        uid_list_dy["dynamic"]["list"] = list(set(uid_list_dy["dynamic"]["list"]))
 
     async def backup(self):
         """备份数据库"""

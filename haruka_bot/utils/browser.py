@@ -305,3 +305,56 @@ async def get_github_screenshot(url: str):
         await page.close()
         await context.close()
 
+async def get_weibo_screenshot(url: str):
+    """获取微博截图"""
+    PAGE_WIDTH = 800
+
+    if config.haruka_browser_ua:
+        user_agent = config.haruka_browser_ua
+    else:
+        user_agent = ("Mozilla/5.0 (Linux; Android 11; RMX3161 Build/RKQ1.201217.003; wv) AppleWebKit/537.36 "
+                      "(KHTML, like Gecko) Version/4.0 Chrome/101.0.4896.59 Mobile Safari/537.36")
+
+    browser:Browser = await get_browser()
+    context = await browser.new_context(
+        bypass_csp=True,
+        device_scale_factor=2,
+        user_agent=user_agent,
+        viewport={"width": PAGE_WIDTH, "height": 600},
+        )
+    page = await context.new_page()
+
+    try:
+        try:
+            await page.goto(
+                    url,
+                    wait_until="networkidle",
+                    timeout=config.haruka_dynamic_timeout * 1000,
+                )
+            load_success = True
+        except Exception as e0:
+            load_success = False
+            logger.error(f'访问微博页面出错, 尝试继续执行: {e0.args}')
+
+        # await page.add_script_tag(path= github_js)
+        # page_height = await page.evaluate('removeExtraDoms()')
+        # await page.set_viewport_size({"width": PAGE_WIDTH, "height": page_height})
+
+        if load_success:
+            await page.wait_for_load_state("networkidle")
+            await page.wait_for_load_state("domcontentloaded")
+
+        body = await page.query_selector('body')
+        body_clip = await body.bounding_box() if body else None
+        if body_clip:
+            body_clip['x'] = 0.0
+            body_clip['y'] = 0.0
+            body_clip["height"] = min(body_clip["height"], 32766)  # 限制高度
+        screenshot = await page.screenshot(clip=body_clip, full_page=True)
+        return screenshot
+    except Exception as e:
+        logger.exception(f"截取微博网页时发生错误：{url}")
+        return await page.screenshot(full_page=True)
+    finally:
+        await page.close()
+        await context.close()

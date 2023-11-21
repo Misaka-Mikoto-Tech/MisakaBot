@@ -12,5 +12,6 @@ if isinstance(globals()["__loader__"], PluginLoader):
 
     from . import plugins  # noqa: F401
     from . import douyin  # noqa: F401
+    from . import weibo  # noqa: F401
 
 from .version import VERSION, __version__  # noqa: F401

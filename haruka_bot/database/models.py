@@ -63,6 +63,13 @@ class Sub_dy(BaseModel):
     sec_uid = CharField(max_length=100)
     name = CharField(max_length=100) # 冗余存储仅用来方便查看
 
+class Sub_weibo(BaseModel):
+    """微博订阅"""
+    group_id = IntField()
+    bot_id = IntField()
+    uid = IntField()
+    name = CharField(max_length=100) # 冗余存储仅用来方便查看
+
 class User(BaseModel):
     uid = IntField(pk=True)
     name = CharField(max_length=20)
@@ -72,6 +79,11 @@ class User_dy(BaseModel):
     name = CharField(max_length=100)
     room_id = IntField(default=0)
     live_url = CharField(max_length=100)
+
+class User_weibo(BaseModel):
+    uid = IntField(pk=True)
+    name = CharField(max_length=20)
+    containerid = IntField(default=0)
 
 class Group(BaseModel):
     # tortoise 不支持复合主键，因此只能代码里不设置主键(tortoise会自动创建一个名为id的自增列作为主键)
