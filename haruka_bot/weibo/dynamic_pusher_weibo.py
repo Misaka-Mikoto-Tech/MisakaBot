@@ -28,8 +28,8 @@ async def weibo_sched():
 
     global offset_weibo
 
-    uid: str = str(await db.next_uid_weibo("dynamic"))
-    if not uid or (uid not in offset_weibo): # 未找到或已删除
+    uid = await db.next_uid_weibo("dynamic")
+    if not uid:
         # 没有订阅先暂停一秒再跳过，不然会导致 CPU 占用过高
         await asyncio.sleep(1)
         return
