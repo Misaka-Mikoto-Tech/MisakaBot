@@ -308,7 +308,7 @@ async def get_github_screenshot(url: str):
 
 async def get_weibo_screenshot(url: str):
     """获取微博截图"""
-    PAGE_WIDTH = 750 # 微博默认最大宽度就是750
+    PAGE_WIDTH = 745 # 微博默认最大宽度就是750, 经测试宽度小于750就会把图片放大，否则是字体大图片小
 
     if config.haruka_browser_ua:
         user_agent = config.haruka_browser_ua
@@ -338,14 +338,13 @@ async def get_weibo_screenshot(url: str):
             logger.error(f'访问微博页面出错, 尝试继续执行: {e0.args}')
 
         await page.add_script_tag(path= weibo_js)
-        page_height = await page.evaluate('removeExtraDoms()')
-        # await page.set_viewport_size({"width": PAGE_WIDTH, "height": page_height})
+        page_rect = await page.evaluate('removeExtraDoms()')
 
         if load_success:
             await page.wait_for_load_state("networkidle")
             await page.wait_for_load_state("domcontentloaded")
 
-        body = await page.query_selector('body')
+        body = await page.query_selector('lite-page-wrap')
         body_clip = await body.bounding_box() if body else None
         if body_clip:
             body_clip['x'] = 0.0
