@@ -82,7 +82,7 @@ class User_dy(BaseModel):
 
 class User_weibo(BaseModel):
     uid = IntField(pk=True)
-    name = CharField(max_length=20)
+    name = CharField(max_length=100)
     containerid = IntField(default=0)
 
 class Group(BaseModel):
