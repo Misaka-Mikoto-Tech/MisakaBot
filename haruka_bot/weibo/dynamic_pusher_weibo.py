@@ -71,7 +71,7 @@ async def weibo_sched():
     else:
         return
     
-    dyn_text = html.unescape(latest_dyn['mblog']['text'])
+    # dyn_text = html.unescape(latest_dyn['mblog']['text'])
     dyn_link = html.unescape(latest_dyn['scheme'])
     logger.info(f"{user_info.name} 发布了新微博 {dyn_link}")
 

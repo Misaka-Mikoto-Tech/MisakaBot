@@ -72,5 +72,5 @@ async def create_dynamic_msg(dyn: Any) -> Message:
 
     # 浏览器截图
     shot_image = await get_weibo_screenshot(dyn_link)
-    msg: Message = MessageSegment.image(shot_image) + f"\n{user_name} 于 {create_time} 发布了微博\n--------------------\n{dyn_link}"
+    msg: Message = f"{user_name} 刚刚发了一条新微博：\n" + MessageSegment.image(shot_image) + f"\n{dyn_link}"
     return msg
