@@ -26,6 +26,7 @@ from .fonts_provider import fill_font
 _browser: Optional[Browser] = None
 mobile_js = Path(__file__).parent.joinpath("mobile.js")
 github_js = Path(__file__).parent.joinpath("github_page.js")
+weibo_js = Path(__file__).parent.joinpath("weibo.js")
 
 
 async def init_browser(**kwargs) -> Browser:
@@ -307,7 +308,7 @@ async def get_github_screenshot(url: str):
 
 async def get_weibo_screenshot(url: str):
     """获取微博截图"""
-    PAGE_WIDTH = 800
+    PAGE_WIDTH = 750 # 微博默认最大宽度就是750
 
     if config.haruka_browser_ua:
         user_agent = config.haruka_browser_ua
@@ -336,8 +337,8 @@ async def get_weibo_screenshot(url: str):
             load_success = False
             logger.error(f'访问微博页面出错, 尝试继续执行: {e0.args}')
 
-        # await page.add_script_tag(path= github_js)
-        # page_height = await page.evaluate('removeExtraDoms()')
+        await page.add_script_tag(path= weibo_js)
+        page_height = await page.evaluate('removeExtraDoms()')
         # await page.set_viewport_size({"width": PAGE_WIDTH, "height": page_height})
 
         if load_success:
