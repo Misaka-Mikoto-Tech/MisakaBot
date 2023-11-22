@@ -308,7 +308,7 @@ async def get_github_screenshot(url: str):
 
 async def get_weibo_screenshot(url: str):
     """获取微博截图"""
-    PAGE_WIDTH = 745 # 微博默认最大宽度就是750, 经测试宽度小于750就会把图片放大，否则是字体大图片小
+    PAGE_WIDTH = 550 # 微博默认最大宽度就是750, 经测试宽度小于750就会把图片放大，否则是字体大图片小
 
     if config.haruka_browser_ua:
         user_agent = config.haruka_browser_ua
@@ -344,7 +344,7 @@ async def get_weibo_screenshot(url: str):
             await page.wait_for_load_state("networkidle")
             await page.wait_for_load_state("domcontentloaded")
 
-        body = await page.query_selector('lite-page-wrap')
+        body = await page.query_selector('.lite-page-wrap')
         body_clip = await body.bounding_box() if body else None
         if body_clip:
             body_clip['x'] = 0.0

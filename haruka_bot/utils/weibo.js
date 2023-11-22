@@ -5,6 +5,8 @@ function removeExtraDoms() {
         '.lite-page-editor',
         '.video-player',
         '.wrap',
+        '.ad-wrap',
+        '.lite-page-editor',
     ];
 
     doms.forEach(domTag => {
