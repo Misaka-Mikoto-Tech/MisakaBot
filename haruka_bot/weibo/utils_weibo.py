@@ -43,7 +43,7 @@ async def search_weibo_user(q: str) -> Union[UserInfo, List[str], None]:
     '98','超话'
     '32','主页'
     """
-    firstParam = f'100103type=3&q={q}str&t=0'
+    firstParam = f'100103type=3&q={q}&t=0'
     firstParam = parse.quote(firstParam)
     params = {
         'containerid':firstParam,

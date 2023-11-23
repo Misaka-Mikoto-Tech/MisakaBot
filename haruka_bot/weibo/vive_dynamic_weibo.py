@@ -17,7 +17,7 @@ async def _(
     if arg_msg.extract_plain_text().strip():
         matcher.set_arg("arg", arg_msg)
 
-@vive_weibo.got("arg", "请发送抖音用户名")
+@vive_weibo.got("arg", "请发送微博用户名")
 async def _(
     matcher: Matcher, event: MessageEvent, bot:Bot, arg: str = ArgPlainText("arg")
 ):
