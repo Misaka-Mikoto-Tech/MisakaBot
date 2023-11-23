@@ -37,7 +37,7 @@ async def _(
     logger.info(f"接收到查询数据:{vive_text}")
 
     args = vive_text.split(' ')
-    if args[-1].isdigit():
+    if len(args) > 1 and args[-1].isdigit():
         user_name = vive_text[:vive_text.rfind(' ')].strip()
         offset_num = int(args[-1])
     else:
