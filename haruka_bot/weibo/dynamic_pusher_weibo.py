@@ -71,8 +71,8 @@ async def weibo_sched():
     else:
         return
     
-    # dyn_text = html.unescape(latest_dyn['mblog']['text'])
-    dyn_link = html.unescape(latest_dyn['scheme'])
+    # dyn_text = latest_dyn['mblog']['text']
+    dyn_link = latest_dyn['scheme']
     logger.info(f"{user_info.name} 发布了新微博 {dyn_link}")
 
     msg: Message = await create_dynamic_msg(latest_dyn)

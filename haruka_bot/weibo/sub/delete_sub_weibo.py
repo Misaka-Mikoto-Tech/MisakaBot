@@ -11,7 +11,7 @@ from ...database import DB as db
 from ...utils import on_command, to_me, permission_check
 
 delete_sub_weibo = on_command("取关微博", aliases={"微博取关"}, rule=to_me(), priority=5, block=True)
-delete_sub_weibo.__doc__ = """取关微博 uid"""
+delete_sub_weibo.__doc__ = """取关微博 uid/用户名"""
 
 delete_sub_weibo.handle()(permission_check)
 
@@ -26,10 +26,10 @@ async def _(
 async def _(
     matcher: Matcher, event: GroupMessageEvent, bot:Bot, uid: str = ArgPlainText("uid")
 ):
-    if not uid.isdigit():
-        await matcher.finish("请输入纯数字uid")
-
-    user = await db.get_user_weibo(uid=int(uid)) # 从数据库中查找用户信息
+    if uid.isdigit():
+        user = await db.get_user_weibo(uid=int(uid)) # 从数据库中查找用户信息
+    else:
+        user = await db.get_user_weibo(name=uid) # 从数据库中查找用户信息
     if not user:
         return await delete_sub_weibo.send(MessageSegment.at(event.user_id) + " 未找到该微博用户")
     

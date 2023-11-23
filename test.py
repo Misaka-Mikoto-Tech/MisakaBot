@@ -1,5 +1,7 @@
 import asyncio
 import re
+import html
+from urllib import parse
 from pathlib import Path
 from bilireq.live import get_rooms_info_by_uids
 from httpx import AsyncClient, TransportError
@@ -74,18 +76,22 @@ async def screenshot(url):
 # asyncio.run(screenshot('https://github.com/linxinrao/Shamrock/blob/master/app/build.gradle.kts#L181'))
 
 # assert(re.search('^(/issues/|/pull/|/blob/', 'https://github.com/linxinrao/Shamrock/pull/104'))
-async def test():
-    vive_text = 'unity china   10'
+# async def test():
+#     vive_text = 'unity china   10'
 
-    args = vive_text.split(' ')
-    if args[-1].isdigit():
-        user_name = vive_text[:vive_text.rfind(' ')].strip()
-        offset_num = int(args[-1])
-    else:
-        user_name = vive_text
-        offset_num = 0
+#     args = vive_text.split(' ')
+#     if args[-1].isdigit():
+#         user_name = vive_text[:vive_text.rfind(' ')].strip()
+#         offset_num = int(args[-1])
+#     else:
+#         user_name = vive_text
+#         offset_num = 0
 
-    print(f'[{user_name}]')
-    print(offset_num)
+#     print(f'[{user_name}]')
+#     print(offset_num)
 
-asyncio.run(test())
+# asyncio.run(test())
+
+dyn_link = 'https://m.weibo.cn/status/NtNrHaANO?mblogid=NtNrHaANO?xx'
+dyn_link = str(dyn_link).split('?')[0]
+print(dyn_link)

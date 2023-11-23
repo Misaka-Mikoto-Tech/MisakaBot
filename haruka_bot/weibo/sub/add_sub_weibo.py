@@ -11,10 +11,10 @@ from nonebot.params import ArgPlainText, CommandArg
 from ...database import DB as db
 from ...utils import on_command, to_me, permission_check, text_to_img
 from ... import config
-from ..utils_weibo import get_userinfo, get_user_dynamics
+from ..utils_weibo import get_userinfo, get_user_dynamics, search_weibo_user, set_uid_arg_by_q
 
 add_sub_weibo = on_command("微博关注", aliases={"关注微博", "微博订阅"}, rule=to_me(), priority=5, block=True)
-add_sub_weibo.__doc__ = """微博关注 uid"""
+add_sub_weibo.__doc__ = """微博关注 uid/用户名"""
 
 add_sub_weibo.handle()(permission_check)
 
@@ -22,8 +22,11 @@ add_sub_weibo.handle()(permission_check)
 async def _(
     matcher: Matcher, event: GroupMessageEvent, bot:Bot, arg: Message = CommandArg()
 ):
-    if arg.extract_plain_text().strip():
-        matcher.set_arg("uid", arg)
+    arg_text =arg.extract_plain_text().strip()
+    if not arg_text:
+        await matcher.finish('未获取到关注uid/用户名')
+    
+    await set_uid_arg_by_q(matcher=matcher, q=arg_text)
 
 @add_sub_weibo.got("uid", "请发送微博uid")
 async def _(
