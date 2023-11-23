@@ -65,5 +65,5 @@ async def _(
     except IndexError:
         return await vive_weibo.send(MessageSegment.at(event.user_id) + " 你输入的数字过大，该用户的最后一页动态没有这么多条")
     
-    await matcher.send(MessageSegment.at(event.user_id) + await create_dynamic_msg(dyn))
+    await matcher.send(MessageSegment.at(event.user_id) + ' ' + await create_dynamic_msg(dyn))
 
