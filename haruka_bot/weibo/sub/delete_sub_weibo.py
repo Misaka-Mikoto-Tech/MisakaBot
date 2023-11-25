@@ -34,7 +34,7 @@ async def _(
         return await delete_sub_weibo.send(MessageSegment.at(event.user_id) + " 未找到该微博用户")
     
     result = await db.delete_sub_weibo(
-        uid=int(uid),
+        uid=user.uid,
         group_id=event.group_id,
         bot_id=int(bot.self_id)
     )
