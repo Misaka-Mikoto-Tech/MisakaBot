@@ -21,6 +21,6 @@ async def _(event: GroupMessageEvent, bot: Bot):
         else:
             room_msg = ''
         message += (
-            f"{sub.name}{room_msg} at:{"开" if user.at else "关"}\n"
+            f"{sub.name}{room_msg} at:{'开' if sub.at else '关'}\n"
         )
     await sub_list_dy.finish(message.rstrip())
