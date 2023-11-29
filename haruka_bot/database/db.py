@@ -496,6 +496,11 @@ class DB:
         return await Sub.update(kwargs, **{conf: switch})
 
     @classmethod
+    async def set_sub_dy(cls, conf, switch, **kwargs):
+        """开关订阅设置"""
+        return await Sub_dy.update(kwargs, **{conf: switch})
+
+    @classmethod
     async def get_version(cls):
         """获取数据库版本"""
         version = await Version.first()

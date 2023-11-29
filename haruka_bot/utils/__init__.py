@@ -183,7 +183,7 @@ async def safe_send(bot_id, send_type, type_id, message, at=False, prefix = None
                 send_type == "guild"
                 or (await bot.get_group_at_all_remain(group_id=type_id))["can_at_all"]
             ):
-                message = MessageSegment.at("all") + message
+                message = MessageSegment.at("all") + ' ' + message
             if prefix:
                 message = prefix + message
             try:
@@ -199,7 +199,7 @@ async def safe_send(bot_id, send_type, type_id, message, at=False, prefix = None
         send_type == "guild"
         or (await bot.get_group_at_all_remain(group_id=type_id))["can_at_all"]
     ):
-        message = MessageSegment.at("all") + message
+        message = MessageSegment.at("all") + ' ' + message
 
     if prefix:
         message = prefix + message

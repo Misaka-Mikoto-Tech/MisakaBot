@@ -62,6 +62,7 @@ class Sub_dy(BaseModel):
     bot_id = IntField()
     sec_uid = CharField(max_length=100)
     name = CharField(max_length=100) # 冗余存储仅用来方便查看
+    at = BooleanField()  # default=False
 
 class Sub_weibo(BaseModel):
     """微博订阅"""

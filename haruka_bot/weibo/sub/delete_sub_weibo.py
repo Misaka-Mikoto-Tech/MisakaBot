@@ -40,5 +40,5 @@ async def _(
     )
 
     if result:
-        await delete_sub_weibo.finish(f"已取关 {user.name}({user.uid})")
+        await delete_sub_weibo.finish(f"微博已取关 {user.name}({user.uid})")
     await delete_sub_weibo.finish(f"{user.name}未关注")
