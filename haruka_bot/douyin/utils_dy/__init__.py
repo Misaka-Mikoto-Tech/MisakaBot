@@ -195,5 +195,7 @@ async def create_aweme_msg(dyn:Any) -> Message:
 async def get_room_id_and_sec_uid_from_live_url(live_url: str) -> Tuple[int, str]:
     """通过直播间短链获取直播间号和 sec_uid"""
     room_id,sec_user_id = await get_sec_user_id_from_live_url(live_url)
+    if room_id == 0:
+        return (0, '')
     web_rid = await get_live_room_id(room_id,sec_user_id)
     return (web_rid, sec_user_id)

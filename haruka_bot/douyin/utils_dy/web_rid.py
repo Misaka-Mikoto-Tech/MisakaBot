@@ -43,7 +43,10 @@ async def get_sec_user_id_from_live_url(url):
             url, headers=headers,
         )
     redirect_url = resp.headers.get('location')
-    sec_user_id=re.search(r'sec_user_id=([\w\d_\-]+)&',redirect_url).group(1)
+    matches = re.search(r'sec_user_id=([\w\d_\-]+)&',redirect_url)
+    if not matches: # 可能不是通过复制链接的方式分享的
+        return 0, ''
+    sec_user_id=matches.group(1)
     room_id=redirect_url.split('?')[0].rsplit('/',maxsplit=1)[1]
     return room_id,sec_user_id
 

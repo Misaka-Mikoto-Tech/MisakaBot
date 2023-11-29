@@ -26,7 +26,7 @@ async def _(
         matcher.set_arg("user_name", arg)
 
 kLiveShareTips = ('● 请发送以下任意内容：\n'
-                  '   1.直播间分享[推荐]（手机端打开直播间，右下角分享->链接）\n'
+                  '   1.直播间分享[推荐]（手机端打开直播间，右下角 分享->复制链接）\n'
                   '   2.直播间号\n'
                   '● 忽略直播请发送 N')
 
@@ -58,6 +58,8 @@ async def _(
 
     if is_short_url: # 存在直播间短链的情况下，优先使用从短链获取的数据（抖音允许重名，短链分享不会获取到重名用户）
         room_id, sec_uid = await get_room_id_and_sec_uid_from_live_url(live_url)
+        if room_id == 0:
+            await matcher.finish(f'获取room_id失败，请确保复制的是分享链接而不是分享到QQ')
     else:
         if not (sec_uid := await get_sec_user_id(user_name=user_name)):
             return await add_sub_dy.send(MessageSegment.at(event.user_id) + " 未找到该抖音用户名")
