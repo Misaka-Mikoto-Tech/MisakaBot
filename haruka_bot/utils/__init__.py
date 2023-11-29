@@ -193,7 +193,7 @@ async def safe_send(bot_id, send_type, type_id, message, at=False, prefix = None
             except Exception:
                 continue
         logger.error("尝试失败，所有 Bot 均无法推送")
-        return
+        return None
 
     if at and (
         send_type == "guild"
@@ -230,6 +230,7 @@ async def safe_send(bot_id, send_type, type_id, message, at=False, prefix = None
         logger.error(f"推送失败，请检查网络连接，错误信息：{e.msg}")
     except Exception as e:
         logger.error(f"推送失败，错误信息: {e.args}")
+    return None
 
 
 async def get_type_id(event: Union[MessageEvent, ChannelDestroyedNoticeEvent]):

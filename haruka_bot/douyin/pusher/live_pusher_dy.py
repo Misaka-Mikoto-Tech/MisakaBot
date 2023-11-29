@@ -89,24 +89,37 @@ async def live_sched_dy():
     # 推送
     push_list = await db.get_push_list_dy(sec_uid)
     for sets in push_list:
-        await safe_send(
+        # 先尝试整体发送
+        send_ret = await safe_send(
             bot_id=sets.bot_id,
             send_type='group',
             type_id=sets.group_id,
-            message=live_msg,
-            at=False,
-        )
-        await asyncio.sleep(0.5)
-
-        if link_msg: # 由于tx对抖音直播链接有风控，开播消息分成两条发送成功率更高
-            await safe_send(
-            bot_id=sets.bot_id,
-            send_type='group',
-            type_id=sets.group_id,
-            message=link_msg,
+            message=f'{live_msg}\n{link_msg}',
             at=False,
             prefix=f'{random.randint(1, 9)} ', # ios 要求第一个字符必须是数字才允许app读取剪贴板
         )
+
+        # 发送失败时再尝试分片发送 (tx对抖音直播链接有风控，开播消息分成两条发送成功率更高)
+        if not(send_ret and send_ret.get('message_id', '0') != '0'):
+            await safe_send(
+                bot_id=sets.bot_id,
+                send_type='group',
+                type_id=sets.group_id,
+                message=live_msg,
+                at=False,
+            )
+            await asyncio.sleep(0.5)
+
+            if link_msg:
+                await safe_send(
+                    bot_id=sets.bot_id,
+                    send_type='group',
+                    type_id=sets.group_id,
+                    message=f'{user.name} 直播间链接 {link_msg}',
+                    at=False,
+                    prefix=f'{random.randint(1, 9)} ', # ios 要求第一个字符必须是数字才允许app读取剪贴板
+                )
+
         await asyncio.sleep(0.5)
 
 def create_live_msg(user: User_dy, room_info: RoomInfo) -> Tuple[Message, Message]:
