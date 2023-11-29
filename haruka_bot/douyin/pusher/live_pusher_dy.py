@@ -96,7 +96,7 @@ async def live_sched_dy():
             type_id=sets.group_id,
             message=f'{live_msg}\n{link_msg}',
             at=bool(sets.at) if new_status else False,  # 下播不@全体
-            prefix=f'{random.randint(1, 9)} ', # ios 要求第一个字符必须是数字才允许app读取剪贴板
+            prefix=f'{random.randint(1, 9)} ' if new_status else None, # ios 要求第一个字符必须是数字才允许app读取剪贴板
         )
 
         # 发送失败时再尝试分片发送 (tx对抖音直播链接有风控，开播消息分成两条发送成功率更高)

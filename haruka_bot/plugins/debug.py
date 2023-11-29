@@ -10,7 +10,7 @@ from nonebot.adapters.onebot.v11.message import Message
 from nonebot.params import CommandArg
 from nonebot.internal.matcher import Matcher
 
-from ..utils import on_command, to_me, text_to_img
+from ..utils import on_command, to_me, text_to_img, can_at_all
 from ..version import __version__
 from .. import config
 
@@ -40,6 +40,11 @@ async def _(event: GroupMessageEvent, bot:Bot, matcher: Matcher, argMsg: Message
             if not url:
                 await matcher.finish('获取地址失败')
             await matcher.finish(await _ping(url=url))
+        elif arg.startswith('can_at_all'):
+            _, user_id = arg.split(' ')
+            if user_id and user_id.isdigit():
+                ret = await can_at_all(bot=bot, group_id=event.group_id, user_id=int(user_id))
+                await matcher.finish(f'用户 {user_id} {"可以" if ret else "不可以"} at全体')
         else:
             await matcher.finish(await debug_help_menu())
 

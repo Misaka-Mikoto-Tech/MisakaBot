@@ -7,6 +7,7 @@ import httpx
 import nonebot
 from nonebot import on_command as _on_command
 from nonebot import require
+from nonebot.adapters import Bot as BaseBot
 from nonebot.adapters.onebot.v11 import (
     ActionFailed,
     Bot,
@@ -149,6 +150,18 @@ def to_me():
 
     return Rule(_to_me)
 
+async def can_at_all(bot: BaseBot, group_id:int, user_id:int):
+    """用户在指定群中是否可以at all"""
+    try:
+        user_info = await bot.get_group_member_info(group_id=group_id, user_id=user_id)
+        if user_info:
+            role = user_info.get('role', '')
+            return role in ['owner', 'admin']
+        else:
+            return False
+    except Exception as e:
+        logger.error(f'获取群员信息失败: {e.args}')
+        return False
 
 async def safe_send(bot_id, send_type, type_id, message, at=False, prefix = None):
     """发送出现错误时, 尝试重新发送, 并捕获异常且不会中断运行"""
@@ -181,7 +194,7 @@ async def safe_send(bot_id, send_type, type_id, message, at=False, prefix = None
         for bot_id, bot in bots.items():
             if at and (
                 send_type == "guild"
-                or (await bot.get_group_at_all_remain(group_id=type_id))["can_at_all"]
+                or (bot and await can_at_all(bot=bot, group_id=type_id, user_id=int(bot.self_id)))
             ):
                 message = MessageSegment.at("all") + ' ' + message
             if prefix:
@@ -197,7 +210,7 @@ async def safe_send(bot_id, send_type, type_id, message, at=False, prefix = None
 
     if at and (
         send_type == "guild"
-        or (await bot.get_group_at_all_remain(group_id=type_id))["can_at_all"]
+        or (bot and await can_at_all(bot=bot, group_id=type_id, user_id=int(bot.self_id)))
     ):
         message = MessageSegment.at("all") + ' ' + message
 
