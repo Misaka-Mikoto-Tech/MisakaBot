@@ -153,7 +153,7 @@ def to_me():
 async def can_at_all(bot: BaseBot, group_id:int, user_id:int):
     """用户在指定群中是否可以at all"""
     try:
-        user_info = await bot.get_group_member_info(group_id=group_id, user_id=user_id)
+        user_info = await bot.get_group_member_info(group_id=group_id, user_id=user_id, no_cache = True)
         if user_info:
             role = user_info.get('role', '')
             return role in ['owner', 'admin']
