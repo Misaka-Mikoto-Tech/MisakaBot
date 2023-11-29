@@ -37,7 +37,7 @@ async def _(
         return await vive_weibo.send(MessageSegment.at(event.user_id) + " 未找到该微博用户，请输入正确的用户名")
 
     if isinstance(search_resp, list):
-        return await vive_weibo.send(MessageSegment.at(event.user_id) + f"未找到用户 {user_name}, 你是否想要找:\n" + '\n'.join(search_resp))
+        return await vive_weibo.send(MessageSegment.at(event.user_id) + f" 未找到用户 {user_name}, 你是否想要找:\n" + '\n'.join(search_resp))
 
     try:
         user_info = await get_userinfo(uid=search_resp.uid)
