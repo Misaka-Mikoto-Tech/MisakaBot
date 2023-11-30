@@ -34,7 +34,7 @@ async def dy_sched():
         # 没有订阅先暂停一秒再跳过，不然会导致 CPU 占用过高
         await asyncio.sleep(1)
         return
-    await asyncio.sleep(random.uniform(6, 20)) # 随机等待几秒钟，防止被风控
+    await asyncio.sleep(random.uniform(8, 22)) # 随机等待几秒钟，防止被风控
 
     user_name = await db.get_user_dy(sec_uid=sec_uid)
     user_name = user_name.name if user_name else ''
@@ -68,7 +68,7 @@ async def dy_sched():
     else:
         return
     
-    logger.info(f"{user_name} 发布了新动态 {desc}")
+    logger.info(f"{user_name} 发布了新抖音动态 {desc}")
 
     msg: Message = await create_aweme_msg(latest_aweme)
     push_list = await db.get_push_list_dy(sec_uid)
