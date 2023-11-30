@@ -94,7 +94,7 @@ async def live_sched_dy():
             bot_id=sets.bot_id,
             send_type='group',
             type_id=sets.group_id,
-            message=f'{live_msg}\n{link_msg}',
+            message= live_msg + "\n" + link_msg,
             at=bool(sets.at) if new_status else False,  # 下播不@全体
             prefix=f'{random.randint(1, 9)} ' if new_status else None, # ios 要求第一个字符必须是数字才允许app读取剪贴板
         )
@@ -134,9 +134,9 @@ def create_live_msg(user: User_dy, room_info: RoomInfo) -> Tuple[Message, Messag
                 + f"\n{random.randint(1, 9)}- #在抖音，记录美好生活#【{user.name}】正在直播，来和我一起支持Ta吧。复制下方链接，打开【抖音】，直接观看直播！"
 
     if user.live_url:
-        link_msg = MessageSegment.text(f"{user.live_url}") + ''
+        link_msg = Message(MessageSegment.text(f"{user.live_url}"))
     else:
-        link_msg = MessageSegment.text(f"https://live.douyin.com/{user.room_id}") + ''
+        link_msg = Message(MessageSegment.text(f"https://live.douyin.com/{user.room_id}"))
 
     return (live_msg, link_msg)
 
