@@ -9,7 +9,7 @@ from nonebot.log import logger
 
 from nonebot.adapters.onebot.v11.message import MessageSegment, Message
 
-from ...utils import scheduler, safe_send
+from ...utils import scheduler, safe_send, can_at_all
 from ...database import DB as db
 
 from ..core import dy_api
@@ -74,7 +74,7 @@ async def live_sched_dy():
     if new_status:  # 开播
         status_data.online_time = time.time()
         logger.info(f'检测到抖音 {user.name}({user.room_id}) 开播。标题:{room_info.get_title()}')
-        live_msg, link_msg = create_live_msg(user, room_info)
+        live_msg, live_msg_atall, link_msg = create_live_msg(user, room_info)
     else:  # 下播
         status_data.offline_time = time.time()
         online_time_str = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(status_data.online_time))
@@ -84,18 +84,23 @@ async def live_sched_dy():
             live_msg = f"{user.name} 抖音下播了\n本次直播时长 {format_time_span(status_data.offline_time - status_data.online_time)}"
         else:
             live_msg = f"{user.name} 抖音下播了"
+        live_msg_atall = live_msg
         link_msg = ''
 
     # 推送
     push_list = await db.get_push_list_dy(sec_uid)
     for sets in push_list:
         # 先尝试整体发送
+        atall = bool(sets.at) and new_status # 下播不@全体
+        if atall:
+            atall = await can_at_all(bot=sets.bot_id, group_id=sets.group_id, user_id=int(sets.bot_id))
+        live_msg_real = live_msg_atall if atall else live_msg
+
         send_ret = await safe_send(
             bot_id=sets.bot_id,
             send_type='group',
             type_id=sets.group_id,
-            message= live_msg + "\n" + link_msg,
-            at=bool(sets.at) if new_status else False,  # 下播不@全体
+            message= live_msg_real + "\n" + link_msg,
             prefix=f'{random.randint(1, 9)} ' if new_status else None, # ios 要求第一个字符必须是数字才允许app读取剪贴板
         )
 
@@ -105,8 +110,7 @@ async def live_sched_dy():
                 bot_id=sets.bot_id,
                 send_type='group',
                 type_id=sets.group_id,
-                message=live_msg,
-                at=bool(sets.at) if new_status else False,  # 下播不@全体
+                message=live_msg_real,
             )
             await asyncio.sleep(0.5)
 
@@ -122,7 +126,7 @@ async def live_sched_dy():
 
         await asyncio.sleep(0.5)
 
-def create_live_msg(user: User_dy, room_info: RoomInfo) -> Tuple[Message, Message]:
+def create_live_msg(user: User_dy, room_info: RoomInfo) -> Tuple[Message, Message, Message]:
     """生成直播分享信息"""
     # https://live.douyin.com/824433208053?room_id=7282413254901533479&enter_from_merge=web_share_link&enter_method=web_share_link&previous_page=app_code_link
     # 1- #在抖音，记录美好生活#【一吱大仙】正在直播，来和我一起支持Ta吧。复制下方链接，打开【抖音】，直接观看直播！ https://v.douyin.com/ieGsnGsm/ 8@5.com 02/11
@@ -132,13 +136,17 @@ def create_live_msg(user: User_dy, room_info: RoomInfo) -> Tuple[Message, Messag
 
     live_msg = f"{user.name} 正在直播\n--------------------\n标题：{title}\n" + MessageSegment.image(cover) \
                 + f"\n{random.randint(1, 9)}- #在抖音，记录美好生活#【{user.name}】正在直播，来和我一起支持Ta吧。复制下方链接，打开【抖音】，直接观看直播！"
+    
+    live_msg_atall = f"{user.name} 正在直播\n--------------------\n标题：{title}\n" + MessageSegment.image(cover) \
+                + "\n" + MessageSegment.at("all") \
+                + f" #在抖音，记录美好生活#【{user.name}】正在直播，来和我一起支持Ta吧。复制下方链接，打开【抖音】，直接观看直播！"
 
     if user.live_url:
         link_msg = Message(MessageSegment.text(f"{user.live_url}"))
     else:
         link_msg = Message(MessageSegment.text(f"https://live.douyin.com/{user.room_id}"))
 
-    return (live_msg, link_msg)
+    return (live_msg, live_msg_atall, link_msg)
 
 @scheduler.scheduled_job("interval", seconds=3.5 * 3600, id="live_sched_dy_auto_get_cookie")
 async def live_scheh_dy_auto_get_cookie():
