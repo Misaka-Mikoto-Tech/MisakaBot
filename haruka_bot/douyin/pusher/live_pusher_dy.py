@@ -71,10 +71,11 @@ async def live_sched_dy():
         return
     status_data.is_streaming = new_status
 
+    user_name = room_info.get_nick_name() or user.name # 抖音用户喜欢改名，所以优先用请求返回的用户名
     if new_status:  # 开播
         status_data.online_time = time.time()
         logger.info(f'检测到抖音 {user.name}({user.room_id}) 开播。标题:{room_info.get_title()}')
-        live_msg, live_msg_atall, link_msg = create_live_msg(user, room_info)
+        live_msg, live_msg_atall, link_msg = create_live_msg(user, user_name, room_info)
     else:  # 下播
         status_data.offline_time = time.time()
         online_time_str = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(status_data.online_time))
@@ -119,14 +120,14 @@ async def live_sched_dy():
                     bot_id=sets.bot_id,
                     send_type='group',
                     type_id=sets.group_id,
-                    message=f'{user.name} 直播间链接 {link_msg}',
+                    message=f'{user_name} 直播间链接 {link_msg}',
                     at=False,
                     prefix=f'{random.randint(1, 9)} ', # ios 要求第一个字符必须是数字才允许app读取剪贴板
                 )
 
         await asyncio.sleep(0.5)
 
-def create_live_msg(user: User_dy, room_info: RoomInfo) -> Tuple[Message, Message, Message]:
+def create_live_msg(user: User_dy, user_name: str, room_info: RoomInfo) -> Tuple[Message, Message, Message]:
     """生成直播分享信息"""
     # https://live.douyin.com/824433208053?room_id=7282413254901533479&enter_from_merge=web_share_link&enter_method=web_share_link&previous_page=app_code_link
     # 1- #在抖音，记录美好生活#【一吱大仙】正在直播，来和我一起支持Ta吧。复制下方链接，打开【抖音】，直接观看直播！ https://v.douyin.com/ieGsnGsm/ 8@5.com 02/11
@@ -134,12 +135,12 @@ def create_live_msg(user: User_dy, room_info: RoomInfo) -> Tuple[Message, Messag
     title = room_info.get_title()
     cover = room_info.get_cover_url()
 
-    live_msg = f"{user.name} 正在直播\n--------------------\n标题：{title}\n" + MessageSegment.image(cover) \
-                + f"\n{random.randint(1, 9)}- #在抖音，记录美好生活#【{user.name}】正在直播，来和我一起支持Ta吧。复制下方链接，打开【抖音】，直接观看直播！"
+    live_msg = f"{user_name} 正在直播\n--------------------\n标题：{title}\n" + MessageSegment.image(cover) \
+                + f"\n{random.randint(1, 9)}- #在抖音，记录美好生活#【{user_name}】正在直播，来和我一起支持Ta吧。复制下方链接，打开【抖音】，直接观看直播！"
     
-    live_msg_atall = f"{user.name} 正在直播\n--------------------\n标题：{title}\n" + MessageSegment.image(cover) \
+    live_msg_atall = f"{user_name} 正在直播\n--------------------\n标题：{title}\n" + MessageSegment.image(cover) \
                 + "\n" + MessageSegment.at("all") \
-                + f" #在抖音，记录美好生活#【{user.name}】正在直播，来和我一起支持Ta吧。复制下方链接，打开【抖音】，直接观看直播！"
+                + f" #在抖音，记录美好生活#【{user_name}】正在直播，来和我一起支持Ta吧。复制下方链接，打开【抖音】，直接观看直播！"
 
     if user.live_url:
         link_msg = Message(MessageSegment.text(f"{user.live_url}"))
