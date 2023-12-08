@@ -111,30 +111,17 @@ async def _get_msg(bot:Bot, matcher: Matcher, arg: str):
 async def _reply_msg(bot:Bot, matcher: Matcher, arg: str):
     """回复指定 message_id 的消息"""
     try:
-        _, reply_id, at, text = arg.split(' ', 3)
+        _, group_id, reply_id, at_id, text = arg.split(' ', 4)
     except Exception as e:
-        await matcher.finish(f'参数解析失败，格式为: reply reply_id at text')
-
-    at = True if at == '1' else False
-    try:
-        ori_msg_data = await bot.get_msg(message_id=int(reply_id))
-        ori_msg_data['self_id'] = int(bot.self_id)
-        ori_msg_data['font'] = 0
-        ori_msg = Adapter.json_to_event(ori_msg_data)
-        if not ori_msg:
-            raise Exception(f'json_to_event fail')
-        if not isinstance(ori_msg, GroupMessageEvent):
-            raise Exception(f'msg is not GroupMessageEvent')
-    except Exception as e:
-        await matcher.finish(f'获取消息 {reply_id} 失败:{e.args}')
+        await matcher.finish(f'参数解析失败，格式为: reply group_id reply_id at_id text')
 
     msg = MessageSegment.reply(int(reply_id))
-    if at:
-        msg += MessageSegment.at(ori_msg.user_id) + ' '
+    if at_id != '0':
+        msg += MessageSegment.at(at_id) + ' '
     msg += text
 
-    # 在原始消息群进行回复
-    await bot.send_group_msg(group_id=ori_msg.group_id, message=msg)
+    # 在指定消息群进行回复（不通过 get_msg 获取原始消息是因为原始消息可能已被撤回）
+    await bot.send_group_msg(group_id=int(group_id), message=msg)
 
 async def debug_help_menu()->MessageSegment:
     """debug的帮助菜单"""
