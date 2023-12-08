@@ -95,6 +95,7 @@ async def _get_msg(bot:Bot, matcher: Matcher, arg: str):
     try:
         msg_data = await bot.get_msg(message_id=int(msg_id))
         msg_data['self_id'] = int(bot.self_id)
+        msg_data['font'] = 0
     except Exception as e:
         await matcher.finish(f'获取消息 {msg_id} 失败:{e.args}')
     
@@ -118,6 +119,7 @@ async def _reply_msg(bot:Bot, matcher: Matcher, arg: str):
     try:
         ori_msg_data = await bot.get_msg(message_id=int(reply_id))
         ori_msg_data['self_id'] = int(bot.self_id)
+        ori_msg_data['font'] = 0
         ori_msg = Adapter.json_to_event(ori_msg_data)
         if not ori_msg:
             raise Exception(f'json_to_event fail')
