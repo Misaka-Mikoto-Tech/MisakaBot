@@ -3,10 +3,11 @@ from typing import List
 from httpx import AsyncClient, TransportError
 from nonebot.matcher import matchers
 from nonebot.adapters.onebot.v11 import Bot, MessageSegment
-from nonebot.adapters.onebot.v11.event import GroupMessageEvent, Reply
+from nonebot.adapters.onebot.v11.event import GroupMessageEvent, MessageEvent, Reply, PrivateMessageEvent
 from nonebot.permission import SUPERUSER
 from nonebot.adapters.onebot.v11.permission import GROUP_ADMIN, GROUP_OWNER
 from nonebot.adapters.onebot.v11.message import Message
+from nonebot.adapters.onebot.v11.adapter import Adapter
 from nonebot.params import CommandArg
 from nonebot.internal.matcher import Matcher
 
@@ -32,19 +33,18 @@ async def _(event: GroupMessageEvent, bot:Bot, matcher: Matcher, argMsg: Message
         else:
             await matcher.finish('{' + str(event.reply) +'}')
     else:
-        if arg == 'time':
+        if arg == 'time': # 回复时间
             now = time.localtime(time.time())
             await matcher.finish(time.strftime("%Y-%m-%d %H:%M:%S", now))
-        elif arg.startswith('ping'):
+        elif arg.startswith('ping'): # ping 指定地址
             (_, url) = arg.split(' ')
             if not url:
                 await matcher.finish('获取地址失败')
             await matcher.finish(await _ping(url=url))
-        elif arg.startswith('can_at_all'):
-            _, user_id = arg.split(' ')
-            if user_id and user_id.isdigit():
-                ret = await can_at_all(bot=bot, group_id=event.group_id, user_id=int(user_id))
-                await matcher.finish(f'用户 {user_id} {"可以" if ret else "不可以"} at全体')
+        elif arg.startswith('get_msg'): # 获取指定 message_id 的消息
+            await _get_msg(bot, matcher, arg)
+        elif arg.startswith('reply'): # 回复指定 message_id 的消息
+            await _reply_msg(bot, matcher, arg)
         else:
             await matcher.finish(await debug_help_menu())
 
@@ -86,6 +86,50 @@ async def _bili_live_info(bot_id:int, group_id:int):
 async def _dy_live_info(bot_id:int, group_id:int):
     """打印当前群组订阅的直播up信息"""
 
+async def _get_msg(bot:Bot, matcher: Matcher, arg: str):
+    """获取指定 message_id 的消息"""
+    _, msg_id = arg.split(' ')
+    if not msg_id.isdigit():
+        await matcher.finish('未获取到数字格式的 message_id')
+    
+    try:
+        msg_data = await bot.get_msg(message_id=int(msg_id))
+    except Exception as e:
+        await matcher.finish(f'获取消息 {msg_id} 失败:{e.args}')
+    
+    msg = Adapter.json_to_event(msg_data)
+    if not msg:
+        await matcher.finish(f'转换消息失败 {msg_id}')
+
+    # 目前只处理 GroupMessageEvent, PrivateMessageEvent
+    if isinstance(msg, GroupMessageEvent):
+        # 生成转发消息
+        msg.group_id
+    
+async def _reply_msg(bot:Bot, matcher: Matcher, arg: str):
+    """回复指定 message_id 的消息"""
+    try:
+        _, reply_id, at, text = arg.split(' ', 3)
+    except Exception as e:
+        await matcher.finish(f'参数解析失败，格式为: reply reply_id at text')
+
+    at = True if at == '1' else False
+    try:
+        ori_msg_data = await bot.get_msg(message_id=int(reply_id))
+        ori_msg = Adapter.json_to_event(ori_msg_data)
+        if not ori_msg:
+            raise Exception(f'json_to_event fail')
+        if not isinstance(ori_msg, MessageEvent):
+            raise Exception(f'msg is not MessageEvent')
+    except Exception as e:
+        await matcher.finish(f'获取消息 {reply_id} 失败:{e.args}')
+
+    msg = MessageSegment.reply(int(reply_id))
+    if at:
+        msg += MessageSegment.at(ori_msg.user_id) + ' '
+    msg += text
+    await matcher.finish(msg)
+
 async def debug_help_menu()->MessageSegment:
     """debug的帮助菜单"""
     msg = "debug 指令列表\n"
@@ -97,6 +141,8 @@ async def debug_help_menu()->MessageSegment:
     msg += "# 没有引用消息时\n"
     msg += "  time: 发送bot时间\n"
     msg += "  ping: ping指定地址\n"
+    msg += "  get_msg: 获取指定消息: id\n"
+    msg += "  reply: 回复指定消息: id at text\n"
 
     message = MessageSegment.image(await text_to_img(msg, width=425))
     return message
