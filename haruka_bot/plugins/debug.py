@@ -119,8 +119,8 @@ async def _reply_msg(bot:Bot, matcher: Matcher, arg: str):
         ori_msg = Adapter.json_to_event(ori_msg_data)
         if not ori_msg:
             raise Exception(f'json_to_event fail')
-        if not isinstance(ori_msg, MessageEvent):
-            raise Exception(f'msg is not MessageEvent')
+        if not isinstance(ori_msg, GroupMessageEvent):
+            raise Exception(f'msg is not GroupMessageEvent')
     except Exception as e:
         await matcher.finish(f'获取消息 {reply_id} 失败:{e.args}')
 
@@ -128,7 +128,9 @@ async def _reply_msg(bot:Bot, matcher: Matcher, arg: str):
     if at:
         msg += MessageSegment.at(ori_msg.user_id) + ' '
     msg += text
-    await matcher.finish(msg)
+
+    # 在原始消息群进行回复
+    await bot.send_group_msg(group_id=ori_msg.group_id, message=msg)
 
 async def debug_help_menu()->MessageSegment:
     """debug的帮助菜单"""
