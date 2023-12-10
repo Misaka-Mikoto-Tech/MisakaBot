@@ -13,8 +13,8 @@ from ...utils import on_command, to_me, permission_check, text_to_img
 from ..utils_dy import get_user_dynamics, get_sec_user_id, get_aweme_short_url, create_aweme_msg, get_room_id_and_sec_uid_from_live_url
 from ... import config
 
-add_sub_dy = on_command("抖音关注", aliases={"关注抖音", "抖音订阅"}, rule=to_me(), priority=5, block=True)
-add_sub_dy.__doc__ = """抖音关注 用户名"""
+add_sub_dy = on_command("关注抖音", aliases={"抖音关注", "抖音订阅"}, rule=to_me(), priority=5, block=True)
+add_sub_dy.__doc__ = """关注抖音 用户名"""
 
 add_sub_dy.handle()(permission_check)
 

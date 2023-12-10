@@ -13,8 +13,8 @@ from ...utils import on_command, to_me, permission_check, text_to_img
 from ... import config
 from ..utils_weibo import get_userinfo, get_user_dynamics, search_weibo_user, set_uid_arg_by_q
 
-add_sub_weibo = on_command("微博关注", aliases={"关注微博", "微博订阅"}, rule=to_me(), priority=5, block=True)
-add_sub_weibo.__doc__ = """微博关注 uid/用户名"""
+add_sub_weibo = on_command("关注微博", aliases={"微博关注", "微博订阅"}, rule=to_me(), priority=5, block=True)
+add_sub_weibo.__doc__ = """关注微博 uid/用户名"""
 
 add_sub_weibo.handle()(permission_check)
 
