@@ -2,7 +2,7 @@
 import json
 import asyncio
 from pathlib import Path
-from typing import List
+from typing import List, Tuple
 from loguru import logger
 from nonebot.matcher import matchers
 from nonebot.adapters.onebot.v11 import Bot, MessageSegment, Message
@@ -20,7 +20,7 @@ from ..bili_auth import bili_auth
 from .. import config
 
 vive = on_command("查看动态", aliases={"查询动态"}, rule=to_me(), priority=5, block=True) # 数值越小优先级越高
-vive.__doc__ = "查看动态"
+vive.__doc__ = "查看动态 用户名 [v] [offset]"
 
 @vive.handle()
 async def _(
@@ -36,13 +36,7 @@ async def _(
     vive_text = arg.strip()
     logger.info(f"接收到查询数据:{vive_text}")
 
-    args = vive_text.split(' ')
-    if len(args) > 1 and args[-1].isdigit():
-        user_name = vive_text[:vive_text.rfind(' ')].strip()
-        offset_num = int(args[-1])
-    else:
-        user_name = vive_text
-        offset_num = 0
+    user_name, v_mode, offset_num = parseArgs(vive_text)
 
     if not (uid := await uid_extract(user_name)):
         return await vive.send(MessageSegment.at(event.user_id) + " 未找到该 UP，请输入正确的UP 名、UP UID或 UP 首页链接")
@@ -72,6 +66,8 @@ async def _(
 
     if dynamics:
         dynamics = sorted(dynamics, key=lambda x: int(x["id_str"]), reverse=True)
+        if v_mode: # 只查看视频
+            dynamics = [dyn for dyn in dynamics if dyn['type'] == 'DYNAMIC_TYPE_AV']
         # Path('./bili_dynamics.json').write_text(json.dumps(dynamics, indent=2,ensure_ascii=False))
         # logger.info(f"动态列表:{dynamics}, offset_num:{offset_num}")
         try:
@@ -110,3 +106,26 @@ async def _(
         return await vive.send(message)
         
     return await vive.send("该 UP 未发布任何动态")
+
+def parseArgs(text:str)->Tuple[str, bool, int]:
+    """从参数解析出 user_name, v_mode, offset"""
+    args = text.split(' ')
+    argc = len(args)
+
+    # B站用户名不允许包含空格，因此可以从前往后解析
+    user_name = args[0]
+    v_mode = False
+    offset_num = 0
+
+    if argc > 1:
+        arg1 = args[1]
+        if arg1 == 'v':
+            v_mode = True
+            if argc > 2:
+                arg2 = args[2]
+                if arg2.isdigit():
+                    offset_num = int(arg2)
+        elif arg1.isdigit():
+            offset_num = int(arg1)
+
+    return (user_name, v_mode, offset_num)

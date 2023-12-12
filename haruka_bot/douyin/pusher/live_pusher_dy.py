@@ -101,7 +101,7 @@ async def live_sched_dy():
             bot_id=sets.bot_id,
             send_type='group',
             type_id=sets.group_id,
-            message= live_msg_real + "\n" + link_msg,
+            message= (live_msg_real + "\n" + link_msg) if link_msg else live_msg_real,
             prefix=f'{random.randint(1, 9)} ' if new_status else None, # ios 要求第一个字符必须是数字才允许app读取剪贴板
         )
 

@@ -14,9 +14,9 @@ help = on_command("帮助", aliases={"help"},  rule=to_me(), priority=5, block=T
 async def _(event: MessageEvent, bot:Bot):
     bot_id = int(bot.self_id)
     if bot_id in config.bot_names:
-        message = f"<font color=green><b>{config.bot_names[bot_id]}目前支持的功能：</b></font>\n（请将UID替换为需要操作的B站UID）\n"
+        message = f"<font color=green><b>{config.bot_names[bot_id]}目前支持的功能：</b></font>\n（[]表示参数为可选）\n"
     else:
-        message = "<font color=green><b>Bot目前支持的功能：</b></font>\n（请将UID替换为需要操作的B站UID）\n"
+        message = "<font color=green><b>Bot目前支持的功能：</b></font>\n（[]表示参数为可选）\n"
 
     plugin_names:List[str] = []
     for matchers_list in matchers.values():
