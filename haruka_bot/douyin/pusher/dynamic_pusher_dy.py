@@ -36,8 +36,13 @@ async def dy_sched():
         return
     await asyncio.sleep(random.uniform(8, 22)) # 随机等待几秒钟，防止被风控
 
-    user_name = await db.get_user_dy(sec_uid=sec_uid)
-    user_name = user_name.name if user_name else ''
+    user = await db.get_user_dy(sec_uid=sec_uid)
+    if not user:
+        # logger.error(f'没找到抖音用户{sec_uid}')
+        await asyncio.sleep(1)
+        return
+    
+    user_name = user.name
 
     logger.debug(f"爬取抖音动态 {user_name}（{sec_uid}）")
 
@@ -55,6 +60,10 @@ async def dy_sched():
     # 此处假设单个用户不会在一轮循环中发布多条动态，因此只取第一条
     latest_aweme = aweme_list[0]
     latest_aweme_id = int(latest_aweme['aweme_id']) # 貌似 aweme_id 和 create_time 都可以用来判断先后顺序？
+    user_name = latest_aweme['author']['nickname'] or user_name # 抖音用户喜欢改名，所以优先用请求返回的用户名
+
+    if user_name != user.name:
+        await db.update_user_name_dy(sec_uid=sec_uid, name=user_name)
 
     last_aweme_id = offset_dy[sec_uid]
     if last_aweme_id == -1: # 首次爬取当前用户，跳过
@@ -82,6 +91,7 @@ async def dy_sched():
             prefix=f'{random.randint(1, 9)} ', # ios 要求第一个字符必须是数字才允许app读取剪贴板
         )
 
+        await asyncio.sleep(0.5)
 
 def dy_dynamic_lisener(event):
     if hasattr(event, "job_id") and event.job_id != "dy_dynamic_sched":

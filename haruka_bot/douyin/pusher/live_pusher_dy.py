@@ -58,6 +58,10 @@ async def live_sched_dy():
         await cookie_utils.record_cookie_failed()
         return
     room_info = RoomInfo(room_json)
+
+    user_name = room_info.get_nick_name() or user.name # 抖音用户喜欢改名，所以优先用请求返回的用户名
+    if user_name != user.name:
+        await db.update_user_name_dy(sec_uid=sec_uid, name=user_name)
     
     new_status = await room_info.is_going_on_live()
     if sec_uid not in all_status:
@@ -71,7 +75,6 @@ async def live_sched_dy():
         return
     status_data.is_streaming = new_status
 
-    user_name = room_info.get_nick_name() or user.name # 抖音用户喜欢改名，所以优先用请求返回的用户名
     if new_status:  # 开播
         status_data.online_time = time.time()
         logger.info(f'检测到抖音 {user.name}({user.room_id}) 开播。标题:{room_info.get_title()}')

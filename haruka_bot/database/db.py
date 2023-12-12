@@ -443,6 +443,13 @@ class DB:
         await cls.update_uid_list_dy()
 
     @classmethod
+    async def update_user_name_dy(cls, sec_uid:str, name:str):
+        """更新抖音用户的用户名"""
+        q = {"sec_uid":sec_uid}
+        await Sub_dy.update(q, **q, name = name)
+        await User_dy.update(q, name=name)
+
+    @classmethod
     async def update_sub_weibo(cls, **kwargs):
         """更新微博订阅"""
         name = kwargs["name"]
