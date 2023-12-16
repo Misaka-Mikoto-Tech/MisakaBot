@@ -26,8 +26,8 @@ async def on_only_me_on(bot: Bot, event: MessageEvent, matcher: Matcher):
         await matcher.finish('好的，现在听大家的')
 
 @run_preprocessor
-async def check_only_me_mode(bot: Bot, event: MessageEvent, matcher: Matcher):
-    """独占模式Matcher预处理器"""
+async def check_only_me_mode(bot: Bot, event: GroupMessageEvent, matcher: Matcher):
+    """独占模式Matcher过滤函数"""
     if bot.self_id == str(event.sender.user_id):
         return
     elif only_me_mode:
@@ -35,8 +35,7 @@ async def check_only_me_mode(bot: Bot, event: MessageEvent, matcher: Matcher):
         raise IgnoredException("独占模式，取消执行Matcher")
     
 @event_preprocessor
-async def on_event_pre_processor(bot: Bot, event: MessageEvent, matcher: Matcher):
+async def on_event_pre_processor(bot: Bot, event: GroupMessageEvent, matcher: Matcher):
     """事件过滤函数"""
-    # if isinstance(event, GroupMessageEvent):
-    #     if not event.group_id in [123456, 789]: # 白名单群号列表，可以填入配置文件
-    #         raise IgnoredException("群号不在白名单中，取消派发")
+    # if not event.group_id in [123456, 789]: # 白名单群号列表，可以填入配置文件
+    #     raise IgnoredException("群号不在白名单中，取消派发")
