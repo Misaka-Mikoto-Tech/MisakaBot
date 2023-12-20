@@ -9,7 +9,7 @@ from nonebot.log import logger
 
 from nonebot.adapters.onebot.v11.message import MessageSegment, Message
 
-from ...utils import scheduler, safe_send, can_at_all
+from ...utils import scheduler, safe_send, can_at_all, format_time_span
 from ...database import DB as db
 
 from ..core import dy_api
@@ -28,11 +28,6 @@ class LiveStatusData:
     offline_time:float = 0
 
 all_status:Dict[str,LiveStatusData] = {} # [sec_user_id, LiveStatusData]
-
-def format_time_span(seconds:float)->str:
-    m, s = divmod(seconds, 60)
-    h, m = divmod(m, 60)
-    return f"{int(h)}小时{int(m)}分"
     
 @scheduler.scheduled_job("interval", seconds=6, id="live_sched_dy")
 async def live_sched_dy():

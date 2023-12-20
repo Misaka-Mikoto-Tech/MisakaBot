@@ -3,6 +3,7 @@ from . import auto_delete  # noqa: F401
 from . import help  # noqa: F401
 from . import decrease_notice  # noqa: F401
 from . import vive_dynamic  # noqa: F401
+from . import vive_live  # noqa: F401
 from . import bili_login  # noqa: F401
 from . import github_card
 from . import recall_msg

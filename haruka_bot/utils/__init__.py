@@ -1,6 +1,7 @@
 import asyncio
 import sys
 from pathlib import Path
+import time
 from typing import List, Optional, Union, Tuple
 
 import httpx
@@ -30,6 +31,16 @@ from ..cli.handle_message_sent import GroupMessageSentEvent
 
 from .. import config
 
+def format_time_span(seconds:float)->str:
+    """格式化时长字符串"""
+    m, s = divmod(seconds, 60)
+    h, m = divmod(m, 60)
+    return f"{int(h)}小时{int(m):02}分"
+
+def format_time(seconds:float)->str:
+    """格式化由 time.time() 获取的时间"""
+    formatted_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(seconds))
+    return formatted_time
 
 def get_path(*other):
     """获取数据文件绝对路径"""

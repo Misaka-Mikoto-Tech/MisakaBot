@@ -5,7 +5,7 @@ from nonebot.log import logger
 
 from ... import config
 from ...database import DB as db
-from ...utils import PROXIES, safe_send, scheduler
+from ...utils import PROXIES, safe_send, scheduler, format_time_span
 
 from dataclasses import dataclass, astuple
 import time
@@ -20,11 +20,6 @@ class LiveStatusData:
     offline_time:float = 0
 
 all_status:Dict[str,LiveStatusData] = {} # [uid, LiveStatusData]
-
-def format_time_span(seconds:float)->str:
-    m, s = divmod(seconds, 60)
-    h, m = divmod(m, 60)
-    return f"{int(h)}小时{int(m)}分"
 
 @scheduler.scheduled_job("interval", seconds=config.haruka_live_interval, id="live_sched")
 async def live_sched():
@@ -59,6 +54,10 @@ async def live_sched():
         status_data.status_code = new_status
 
         name = info["uname"]
+        title = ''
+        area_name = ''
+        cover = ''
+        url = ''
         if new_status:  # 开播
             status_data.online_time = time.time()
             room_id = info["short_id"] if info["short_id"] else info["room_id"]

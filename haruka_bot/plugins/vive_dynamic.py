@@ -96,8 +96,7 @@ async def _(
             jump_url = await get_b23_url(f"https://t.bilibili.com/{dynamic_id}")
 
         message = (
-            MessageSegment.at(event.user_id)
-            + f" {user_name} {type_msg.get(dyn['type'], type_msg[0])}：\n"
+            f" {user_name} {type_msg.get(dyn['type'], type_msg[0])}：\n"
             + MessageSegment.image(shot_image)
             + f"\n"
             + jump_url
