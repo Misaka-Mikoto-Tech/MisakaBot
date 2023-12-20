@@ -18,7 +18,7 @@ from ..utils.bilibili_request import get_b23_url
 from ..utils import get_dynamic_screenshot, get_user_dynamics
 from ..bili_auth import bili_auth
 from .. import config
-from pusher.live_pusher import all_status
+from .pusher.live_pusher import all_status
 
 vive = on_command("查看直播", aliases={"查询直播"}, rule=to_me(), priority=5, block=True) # 数值越小优先级越高
 vive.__doc__ = "查看直播 用户名"
