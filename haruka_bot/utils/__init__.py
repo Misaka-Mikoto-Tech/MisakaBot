@@ -35,7 +35,9 @@ def format_time_span(seconds:float)->str:
     """格式化时长字符串"""
     m, s = divmod(seconds, 60)
     h, m = divmod(m, 60)
-    return f"{int(h)}小时{int(m):02}分"
+    d, h = divmod(h, 24)
+    dstr = f'{d}天' if d > 0 else ''
+    return f"{dstr}{int(h)}小时{int(m):02}分"
 
 def format_time(seconds:float)->str:
     """格式化由 time.time() 获取的时间"""

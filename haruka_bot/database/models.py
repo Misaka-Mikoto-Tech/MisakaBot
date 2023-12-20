@@ -41,6 +41,14 @@ class BaseModel(Model):
             await query.update(**kwargs)
             return True
         return False
+    
+    @classmethod
+    async def update_all(cls, **kwargs):
+        query = cls.all()
+        if await query.exists():
+            await query.update(**kwargs)
+            return True
+        return False
 
     class Meta:
         abstract = True
@@ -74,6 +82,9 @@ class Sub_weibo(BaseModel):
 class User(BaseModel):
     uid = IntField(pk=True)
     name = CharField(max_length=20)
+    live_status = IntField(default=-1) # 当前直播状态
+    live_on_time = IntField(default=0) # 最后开播时间
+    live_off_time = IntField(default=0) # 最后下播时间
 
 class User_dy(BaseModel):
     sec_uid = CharField(max_length=100, pk=True)

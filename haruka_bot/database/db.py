@@ -136,10 +136,10 @@ class DB:
         return True
 
     @classmethod
-    async def update_user(cls, uid: int, name: str) -> bool:
+    async def update_user(cls, uid: int, **kwargs) -> bool:
         """更新 UP 主信息"""
         if await cls.get_user(uid=uid):
-            await User.update({"uid": uid}, name=name)
+            await User.update({"uid": uid}, **kwargs)
             return True
         return False
     

@@ -18,7 +18,7 @@ from ..utils.bilibili_request import get_b23_url
 from ..utils import get_dynamic_screenshot, get_user_dynamics
 from ..bili_auth import bili_auth
 from .. import config
-from .pusher.live_pusher import all_status
+from ..database import DB as db
 
 vive = on_command("查看主播", aliases={"查询主播"}, rule=to_me(), priority=5, block=True) # 数值越小优先级越高
 vive.__doc__ = "查看主播 用户名"
@@ -67,26 +67,25 @@ async def _(
     area_name = ''
     cover = ''
     url = ''
-    online_time: float = 0
+    live_on_time: float = 0
     if live_status:  # 正在直播
         room_id = info["short_id"] if info["short_id"] else info["room_id"]
         url = "https://live.bilibili.com/" + str(room_id)
-        online_time = float(info["live_time"])
+        live_on_time = float(info["live_time"])
         title = info["title"]
         area_name = f"{info['area_v2_parent_name']} - {info['area_v2_name']}"
         cover = (
             info["cover_from_user"] if info["cover_from_user"] else info["keyframe"]
         )
 
-        live_span = format_time_span(time.time() - online_time)
+        live_span = format_time_span(time.time() - live_on_time)
         live_msg = (
             f"{name} 正在直播\n已开播 {live_span}\n--------------------\n标题：{title}\n分区：{area_name}\n" + MessageSegment.image(cover) + f"\n{url}"
         )
     else:
-        live_msg = f"{name} 未开播"
-        # 如果是已订阅up，检查上次开播时间
-        if status_data:= all_status.get(uid):
-            if status_data.online_time > 1:
-                live_msg = f"{name} 未开播, 上次开播时间 {format_time(status_data.online_time)}"
+        live_msg = f"{name}({uid}) 未开播"
+        user = await db.get_user(uid=int(uid)) # 如果是已订阅up，检查上次开播时间
+        if user and user.live_on_time > 0:
+            live_msg = f"{name}({uid}) 未开播\n上次开播时间 {format_time(user.live_on_time)}"
 
     await vive.finish(live_msg)

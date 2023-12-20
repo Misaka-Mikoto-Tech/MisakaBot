@@ -8,7 +8,7 @@ from ..utils import on_command, to_me
 from .utils_weibo import create_dynamic_msg, get_userinfo, get_user_dynamics, search_weibo_user
 
 vive_weibo = on_command("查看微博", aliases={"查询微博", "微博动态"}, rule=to_me(), priority=5, block=True) # 数值越小优先级越高
-vive_weibo.__doc__ = "查看微博"
+vive_weibo.__doc__ = "查看微博 用户名"
 
 @vive_weibo.handle()
 async def _(

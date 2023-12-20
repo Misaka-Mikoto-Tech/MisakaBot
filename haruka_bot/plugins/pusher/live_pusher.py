@@ -5,6 +5,7 @@ from nonebot.log import logger
 
 from ... import config
 from ...database import DB as db
+from ...database.models import User
 from ...utils import PROXIES, safe_send, scheduler, format_time_span
 
 from dataclasses import dataclass, astuple
@@ -12,28 +13,14 @@ import time
 from typing import Dict
 from ...bili_auth import bili_auth
 
-@dataclass
-class LiveStatusData:
-    """直播间状态数据"""
-    status_code:int
-    online_time:float = 0
-    offline_time:float = 0
-
-all_status:Dict[str,LiveStatusData] = {} # [uid, LiveStatusData]
-
 @scheduler.scheduled_job("interval", seconds=config.haruka_live_interval, id="live_sched")
 async def live_sched():
     """直播推送"""
-
-    # if not bili_auth.is_logined:
-    #     await asyncio.sleep(1)
-    #     return
+    await _check_inited()
 
     uids = await db.get_uid_list("live")
-
     if not uids:  # 订阅为空
         return
-    logger.debug(f"爬取直播列表，目前开播{sum(o.status_code for o in all_status.values())}人，总共{len(uids)}人")
     try:
         res = await get_rooms_info_by_uids(uids, reqtype="web", proxies=PROXIES)
     except Exception as e:
@@ -43,16 +30,19 @@ async def live_sched():
     if not res:
         return
     for uid, info in res.items():
+        user = await db.get_user(uid=uid)
+        assert(user)
         new_status = 0 if info["live_status"] == 2 else info["live_status"]
-        if uid not in all_status:
-            online_time = float(info['live_time']) if new_status else 0 # 只有开播时获取的时间才有意义, 非直播时B站会乱填这个值
-            all_status[uid] = LiveStatusData(status_code=new_status, online_time=online_time)
+        # bot启动后第一次轮询到
+        if user.live_status == -1:
+            live_on_time = float(info['live_time']) if new_status else 0 # 只有开播时获取的时间才有意义, 非直播时B站会乱填这个值
+            if live_on_time > 0: # 更新数据库
+                await db.update_user(uid=int(uid), live_on_time = live_on_time, live_status=new_status)
+            else:
+                await db.update_user(uid=int(uid), live_status=new_status)
             continue
-        status_data:LiveStatusData = all_status[uid]
-        old_status = status_data.status_code
-        if new_status == old_status:  # 直播间状态无变化
+        if new_status == user.live_status:  # 直播间状态无变化
             continue
-        status_data.status_code = new_status
 
         name = info["uname"]
         title = ''
@@ -60,7 +50,6 @@ async def live_sched():
         cover = ''
         url = ''
         if new_status:  # 开播
-            status_data.online_time = time.time()
             room_id = info["short_id"] if info["short_id"] else info["room_id"]
             url = "https://live.bilibili.com/" + str(room_id)
             title = info["title"]
@@ -74,14 +63,19 @@ async def live_sched():
                 f"{name} 正在直播\n--------------------\n标题：{title}\n分区：{area_name}\n" + MessageSegment.image(cover) + f"\n{url}"
             )
         else:  # 下播
-            status_data.offline_time = time.time()
             logger.info(f"检测到下播：{name}（{uid}）")
             if not config.haruka_live_off_notify:  # 没开下播推送
                 continue
-            if status_data.online_time > 0:
-                live_msg = f"{name} 下播了\n本次直播时长 {format_time_span(status_data.offline_time - status_data.online_time)}"
+            if user.live_on_time > 0:
+                live_msg = f"{name} 下播了\n本次直播时长 {format_time_span(time.time() - user.live_on_time)}"
             else:
                 live_msg = f"{name} 下播了"
+
+        # 更新数据库用户信息
+        if new_status:
+            await db.update_user(int(uid), name=name, live_on_time=float(info['live_time']), live_status=new_status)
+        else:
+            await db.update_user(int(uid), name=name, live_off_time=time.time(), live_status=new_status)
 
         # 推送
         push_list = await db.get_push_list(uid, "live")
@@ -98,4 +92,10 @@ async def live_sched():
                 at=bool(sets.at) if new_status else False,  # 下播不@全体
             )
             await asyncio.sleep(0.7)
-        await db.update_user(int(uid), name)
+        
+inited: bool = False
+async def _check_inited():
+    global inited
+    if not inited:
+        await User.update_all(live_status = -1) # bot 启动时状态统一设置为 -1
+        inited = True

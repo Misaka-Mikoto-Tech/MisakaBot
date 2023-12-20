@@ -153,7 +153,7 @@ async def dy_sched():
             offset[uid] = dynamic_id
 
     if dynamic:
-        await db.update_user(uid, name)
+        await db.update_user(uid, name=name)
 
 
 def dynamic_lisener(event):
