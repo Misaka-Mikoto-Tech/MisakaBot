@@ -80,7 +80,7 @@ async def _(
 
         live_span = format_time_span(time.time() - online_time)
         live_msg = (
-            f"{name} 正在直播，已开播 {live_span}\n--------------------\n标题：{title}\n分区：{area_name}\n" + MessageSegment.image(cover) + f"\n{url}"
+            f"{name} 正在直播\n已开播 {live_span}\n--------------------\n标题：{title}\n分区：{area_name}\n" + MessageSegment.image(cover) + f"\n{url}"
         )
     else:
         live_msg = f"{name} 未开播"
