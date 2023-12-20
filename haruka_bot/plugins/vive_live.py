@@ -20,8 +20,8 @@ from ..bili_auth import bili_auth
 from .. import config
 from .pusher.live_pusher import all_status
 
-vive = on_command("查看直播", aliases={"查询直播"}, rule=to_me(), priority=5, block=True) # 数值越小优先级越高
-vive.__doc__ = "查看直播 用户名"
+vive = on_command("查看主播", aliases={"查询主播"}, rule=to_me(), priority=5, block=True) # 数值越小优先级越高
+vive.__doc__ = "查看主播 用户名"
 
 @vive.handle()
 async def _(
@@ -30,12 +30,12 @@ async def _(
     if arg_msg.extract_plain_text().strip():
         matcher.set_arg("arg", arg_msg)
 
-@vive.got("arg", "请发送UP名称")
+@vive.got("arg", "请发送主播名称")
 async def _(
     matcher: Matcher, event: MessageEvent, bot:Bot, arg: str = ArgPlainText("arg")
 ):
     vive_text = arg.strip()
-    logger.info(f"接收到查询直播数据:{vive_text}")
+    logger.info(f"接收到查询主播数据:{vive_text}")
 
     user_name = vive_text
 
