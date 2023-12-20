@@ -45,7 +45,8 @@ async def live_sched():
     for uid, info in res.items():
         new_status = 0 if info["live_status"] == 2 else info["live_status"]
         if uid not in all_status:
-            all_status[uid] = LiveStatusData(new_status)
+            online_time = float(info['live_time']) if new_status else 0 # 只有开播时获取的时间才有意义, 非直播时B站会乱填这个值
+            all_status[uid] = LiveStatusData(status_code=new_status, online_time=online_time)
             continue
         status_data:LiveStatusData = all_status[uid]
         old_status = status_data.status_code

@@ -49,6 +49,7 @@ async def _(
 
     try:
         res = await get_rooms_info_by_uids([uid], reqtype="web", proxies=PROXIES)
+        # Path(f"./bili_live_info.json").write_text(json.dumps(res, indent=2,ensure_ascii=False), encoding='utf8')
     except Exception as e:
         logger.error(f"获取开播列表失败: {e}")
         await vive.finish(f'获取 {user_name} 直播状态失败-1')
@@ -66,25 +67,21 @@ async def _(
     area_name = ''
     cover = ''
     url = ''
+    online_time: float = 0
     if live_status:  # 正在直播
         room_id = info["short_id"] if info["short_id"] else info["room_id"]
         url = "https://live.bilibili.com/" + str(room_id)
+        online_time = float(info["live_time"])
         title = info["title"]
         area_name = f"{info['area_v2_parent_name']} - {info['area_v2_name']}"
         cover = (
             info["cover_from_user"] if info["cover_from_user"] else info["keyframe"]
         )
 
+        live_span = format_time_span(time.time() - online_time)
         live_msg = (
-                f"{name} 正在直播\n--------------------\n标题：{title}\n分区：{area_name}\n" + MessageSegment.image(cover) + f"\n{url}"
-            )
-        # 如果是已订阅up，检查开播时长
-        if status_data:= all_status.get(uid):
-            if status_data.online_time > 1:
-                live_span = format_time_span(time.time() - status_data.online_time)
-                live_msg = (
-                    f"{name} 正在直播，已开播 {live_span}\n--------------------\n标题：{title}\n分区：{area_name}\n" + MessageSegment.image(cover) + f"\n{url}"
-                )
+            f"{name} 正在直播，已开播 {live_span}\n--------------------\n标题：{title}\n分区：{area_name}\n" + MessageSegment.image(cover) + f"\n{url}"
+        )
     else:
         live_msg = f"{name} 未开播"
         # 如果是已订阅up，检查上次开播时间
