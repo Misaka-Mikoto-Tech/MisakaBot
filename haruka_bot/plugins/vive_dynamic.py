@@ -42,7 +42,7 @@ async def _(
         return await vive.send(MessageSegment.at(event.user_id) + " 未找到该 UP，请输入正确的UP 名、UP UID或 UP 首页链接")
 
     if isinstance(uid, list):
-        return await vive.send(MessageSegment.at(event.user_id) + f" 未找到{user_name}, 你是否想要找:\n" + '\n'.join([item['uname'] for item in uid[:10] ]))
+        return await vive.send(MessageSegment.at(event.user_id) + f" 未找到 {user_name}, 你是否想要找:\n" + '\n'.join([item['uname'] for item in uid[:10] ]))
     elif int(uid) == 0:
         return await vive.send(MessageSegment.at(event.user_id) + " UP 主不存在")
 
