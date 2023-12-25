@@ -86,6 +86,6 @@ async def _(
         live_msg = f"{name}({uid}) 未开播"
         user = await db.get_user(uid=int(uid)) # 如果是已订阅up，检查上次开播时间
         if user and user.live_on_time > 0:
-            live_msg = f"{name}({uid}) 未开播\n上次开播时间 {format_time(user.live_on_time)}\上次直播时长 {format_time_span(user.live_off_time - user.live_on_time)}"
+            live_msg = f"{name}({uid}) 未开播\n上次开播时间 {format_time(user.live_on_time)}\n上次直播时长 {format_time_span(user.live_off_time - user.live_on_time)}"
 
     await vive.finish(live_msg)
