@@ -35,7 +35,7 @@ async def check_only_me_mode(bot: Bot, event: GroupMessageEvent, matcher: Matche
         raise IgnoredException("独占模式，取消执行Matcher")
     
 @event_preprocessor
-async def on_event_pre_processor(bot: Bot, event: GroupMessageEvent, matcher: Matcher):
+async def on_event_pre_processor(bot: Bot, event: GroupMessageEvent):
     """事件过滤函数"""
     # if not event.group_id in [123456, 789]: # 白名单群号列表，可以填入配置文件
     #     raise IgnoredException("群号不在白名单中，取消派发")
