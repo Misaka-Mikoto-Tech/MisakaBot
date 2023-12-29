@@ -1,14 +1,14 @@
 from typing import Union
 
-from nonebot import on_notice
+from nonebot import on_request
 from nonebot.matcher import Matcher
 from nonebot.adapters.onebot.v11 import Bot
 from nonebot.adapters.onebot.v11 import GroupRequestEvent
 from nonebot.log import logger
 
-group_request_notice = on_notice(priority=5)
+group_request = on_request(priority=5)
 
-@group_request_notice.handle()
+@group_request.handle()
 async def _(event: GroupRequestEvent, bot: Bot, matcher: Matcher):
     """加群申请处理函数"""
     request_msg = f"bot:{bot.self_id}: {event.user_id} 申请加群 {event.group_id}, 加群信息:{event}"
