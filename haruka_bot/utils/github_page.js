@@ -31,11 +31,16 @@ function removeExtraDoms() {
         searchBox && (searchBox.firstChild.firstChild.childNodes[1].remove());
     } catch(e){}
 
-    // 移除 Notifications
+    // 移除 Sponsor 和 Notifications
     let pagehead_actions = document.querySelector('ul.pagehead-actions');
     if (pagehead_actions) {
-        let notifications = pagehead_actions.querySelector('li');
-        notifications && notifications.innerText.trim() === 'Notifications' && notifications.remove();
+        let lis = pagehead_actions.querySelectorAll('li');
+        for(let i = lis.length - 1; i >= 0; i--) {
+            let li = lis[i];
+            if(['Sponsor', 'Notifications'].includes(li.innerText.trim())) {
+                li.remove();
+            }
+        }
     }
 
 
