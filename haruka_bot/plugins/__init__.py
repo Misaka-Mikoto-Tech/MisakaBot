@@ -9,6 +9,7 @@ from . import github_card  # noqa: F401
 from . import recall_msg  # noqa: F401
 from . import debug  # noqa: F401
 from . import group_request_notice  # noqa: F401
+from . import send_audio_from_file  # noqa: F401
 from .at import at_off, at_on  # noqa: F401
 from .dynamic import dynamic_off, dynamic_on  # noqa: F401
 from .live import live_off, live_on, live_tips  # noqa: F401

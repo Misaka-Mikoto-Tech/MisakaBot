@@ -24,7 +24,6 @@ function removeExtraDoms() {
         fileTree && (fileTree.parentElement.parentElement.parentElement.parentElement.remove());
     } catch(e){}
     
-
     // 移除搜索框
     let searchBox = document.getElementById('StickyHeader');
     try {
@@ -42,7 +41,6 @@ function removeExtraDoms() {
             }
         }
     }
-
 
     /**
      * header 相关的节点都有两套，所以需要查找并移除两次(一个是浮动的，一个是页面内的)
