@@ -34,7 +34,7 @@ async def _(
     if match:
         group_id = int(match.group(1))
         wav_path = match.group(2)
-        wav_path = './data/record/' + wav_path
+        wav_path = 'file:///' + str(Path('./data/record').joinpath(wav_path).absolute())
     else:
         return await send_wav.finish("参数格式错误:group wav_path")
     
