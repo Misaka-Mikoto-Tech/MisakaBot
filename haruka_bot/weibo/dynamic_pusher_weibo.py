@@ -49,6 +49,10 @@ async def weibo_sched():
         logger.error(f"获取微博用户动态失败, {e.args}")
         return
     
+    if dynamics.get('data') is None:
+        logger.error(f"获取微博用户动态失败, no [data] field in response")
+        return
+    
     dynamic_list = dynamics['data']['cards'] if "cards" in dynamics['data'] else None
     if not dynamic_list:
         logger.debug(f'用户 {user_info.name} 未发布任何微博')
