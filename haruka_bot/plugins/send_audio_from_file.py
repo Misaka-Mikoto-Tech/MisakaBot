@@ -34,7 +34,7 @@ async def _(
     if match:
         group_id = int(match.group(1))
         wav_path = match.group(2)
-        wav_path = 'file:///' + str(Path('./data/record').joinpath(wav_path).absolute())
+        wav_path = f'./data/record/{wav_path}'
     else:
         return await send_wav.finish("参数格式错误:group wav_path")
     
@@ -45,8 +45,12 @@ async def _(
         return await send_wav.finish("wav文件不存在")
     
     silk_path = await get_silk_from_wav(wav_path)
+    record_path = silk_path if silk_path else wav_path
+    record_path = 'file://' + str(Path(record_path).absolute())
 
-    msg: Message = Message(MessageSegment.record(f"{silk_path if silk_path else wav_path}"))
+    logger.info(f"发送语音文件: {record_path} 到群: {group_id}")
+
+    msg: Message = Message(MessageSegment.record(record_path))
     await bot.send_group_msg(group_id=group_id, message= msg)
 
     await asyncio.sleep(5) # 5秒后删除临时文件
