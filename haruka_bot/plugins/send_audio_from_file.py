@@ -38,11 +38,37 @@ async def _(
     else:
         return await send_wav.finish("参数格式错误:group wav_path")
     
-    if not Path(wav_path).exists():
-        return await send_wav.finish("wav文件不存在")
-    
     if group_id <= 0:
         group_id = event.group_id
 
-    msg: Message = Message(MessageSegment.record(f"{wav_path}"))
+    if not Path(wav_path).exists():
+        return await send_wav.finish("wav文件不存在")
+    
+    silk_path = await get_silk_from_wav(wav_path)
+
+    msg: Message = Message(MessageSegment.record(f"{silk_path if silk_path else wav_path}"))
     await bot.send_group_msg(group_id=group_id, message= msg)
+
+    await asyncio.sleep(5) # 5秒后删除临时文件
+    if Path(silk_path).exists():
+        Path(silk_path).unlink()
+
+async def get_silk_from_wav(wav_path: str) -> str:
+    """尝试将wav转换成silk文件"""
+    silk_path = wav_path.replace('.wav', '.silk')
+    if Path(silk_path).exists():
+        return silk_path
+    
+    p = await asyncio.create_subprocess_exec('./bin/wav2silk.sh', wav_path)
+    output = await p.communicate()
+    output0 = output[0].decode('utf-8')
+    output1 = output[1].decode('utf-8')
+    if output0:
+        logger.info(output0)
+    if output1:
+        logger.error(output1)
+
+    if Path(silk_path).exists():
+        return silk_path
+    else:
+        return ""
