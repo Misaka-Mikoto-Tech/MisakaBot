@@ -63,14 +63,13 @@ async def get_silk_from_wav(wav_path: str) -> str:
     if Path(silk_path).exists():
         return silk_path
     
-    p = await asyncio.create_subprocess_exec('./bin/wav2silk.sh', wav_path)
-    output = await p.communicate()
-    output0 = output[0].decode('utf-8')
-    output1 = output[1].decode('utf-8')
-    if output0:
-        logger.info(output0)
-    if output1:
-        logger.error(output1)
+    p = await asyncio.create_subprocess_exec('sh', './bin/wav2silk.sh', wav_path,
+                                             stdout=asyncio.subprocess.PIPE,
+                                             stderr=asyncio.subprocess.PIPE)
+    stdout, stderr = await p.communicate()
+    errMsg = stderr.decode().strip()
+    if errMsg:
+        logger.error(errMsg)
 
     if Path(silk_path).exists():
         return silk_path
