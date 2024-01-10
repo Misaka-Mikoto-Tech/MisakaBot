@@ -68,8 +68,8 @@ async def get_silk_from_wav(wav_path: str) -> str:
                                              stderr=asyncio.subprocess.PIPE)
     stdout, stderr = await p.communicate()
     errMsg = stderr.decode().strip()
-    if errMsg:
-        logger.error(errMsg)
+    # if errMsg: # ffmpeg 把所有信息输出到 stderr 了。。。
+    #     logger.error(errMsg)
 
     if Path(silk_path).exists():
         return silk_path
