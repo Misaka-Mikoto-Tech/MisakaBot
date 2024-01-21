@@ -34,7 +34,7 @@ async def dy_sched():
         # 没有订阅先暂停一秒再跳过，不然会导致 CPU 占用过高
         await asyncio.sleep(1)
         return
-    await asyncio.sleep(random.uniform(8, 22)) # 随机等待几秒钟，防止被风控
+    await asyncio.sleep(random.uniform(10, 22)) # 随机等待几秒钟，防止被风控
 
     user = await db.get_user_dy(sec_uid=sec_uid)
     if not user:

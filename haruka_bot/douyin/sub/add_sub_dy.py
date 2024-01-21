@@ -26,9 +26,9 @@ async def _(
         matcher.set_arg("user_name", arg)
 
 kLiveShareTips = ('● 请发送以下任意内容：\n'
-                  '   1.直播间分享[推荐]（手机端打开直播间，右下角 分享->复制链接）\n'
-                  '   2.直播间号\n'
-                  '● 忽略直播请发送 N')
+                    '   1.直播间分享[推荐]（手机端打开直播间，右下角 分享->复制链接）\n'
+                    '   2.直播间号\n'
+                    '● 忽略直播请发送 N')
 
 @add_sub_dy.got("user_name", "请发送抖音用户名")
 @add_sub_dy.got("live_url", kLiveShareTips)
