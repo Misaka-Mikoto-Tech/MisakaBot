@@ -14,6 +14,8 @@ sub_list.__doc__ = """关注列表"""
 @sub_list.handle()
 async def _(event: MessageEvent, bot: Bot):
     """发送当前位置的订阅列表"""
+    # TODO 带global参数时输出所有群中的关注列表
+    
     message = "关注列表（所有群/好友/bot都是分开的）\n\n"
     subs = await db.get_sub_list(event.message_type, await get_type_id(event), bot.self_id)
     for sub in subs:
