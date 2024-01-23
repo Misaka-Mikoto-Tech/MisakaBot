@@ -42,10 +42,10 @@ async def _(event: GroupRequestEvent, bot: Bot, matcher: Matcher):
 
 #     action = event.message.extract_plain_text().strip()
 #     try:
-#         if action == '同意':
+#         if '同意' in action:
 #             await last_req.approve(bot=bot)
 #             await matcher.send('已同意')
-#         else:
+#         elif '拒绝' in action:
 #             await last_req.reject(bot=bot, reason='管理员拒绝')
 #             await matcher.send('已拒绝')
 #     finally:
