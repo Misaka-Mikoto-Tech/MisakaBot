@@ -11,7 +11,7 @@ from nonebot.adapters.onebot.v11 import GroupRequestEvent
 from nonebot.adapters.onebot.v11.event import GroupMessageEvent
 from nonebot.log import logger
 
-# _last_request: Dict[int, GroupRequestEvent] = {} # TODO 考虑每个群存储多个请求
+_last_request: Dict[int, GroupRequestEvent] = {} # TODO 考虑每个群存储多个请求
 
 group_request = on_request(priority=5)
 
@@ -48,5 +48,8 @@ async def _(event: GroupRequestEvent, bot: Bot, matcher: Matcher):
 #         elif '拒绝' in action:
 #             await last_req.reject(bot=bot, reason='管理员拒绝')
 #             await matcher.send('已拒绝')
+#     except Exception as e:
+#         logger.error(f'处理加群申请失败: {e}')
+#         await matcher.send(f'处理失败, {e.args}')
 #     finally:
 #         del _last_request[event.group_id]
